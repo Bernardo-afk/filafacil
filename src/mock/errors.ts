@@ -25,6 +25,9 @@ export type MockApiErrorCode =
   | 'CURRENT_PASSWORD_INVALID'
   | 'ADDRESS_LIMIT_REACHED'
   | 'PLAN_INACTIVE'
+  | 'CANNOT_SUSPEND_SELF'
+  | 'LAST_ADMIN_PROTECTED'
+  | 'STAFF_REQUIRES_MEMBERSHIP'
 
 export interface MockApiErrorDetails {
   [field: string]: unknown
@@ -67,6 +70,9 @@ const MESSAGES: Record<MockApiErrorCode, string> = {
   CURRENT_PASSWORD_INVALID: 'Senha atual incorreta.',
   ADDRESS_LIMIT_REACHED: 'Limite de 10 endereços atingido.',
   PLAN_INACTIVE: 'Este plano está inativo e não pode ser atribuído.',
+  CANNOT_SUSPEND_SELF: 'Você não pode suspender sua própria conta.',
+  LAST_ADMIN_PROTECTED: 'Não é possível remover o último administrador ativo da plataforma.',
+  STAFF_REQUIRES_MEMBERSHIP: 'Um usuário STAFF precisa de pelo menos um vínculo.',
 }
 
 /** Atalho: `throw apiError('CPF_INVALID')` usa a mensagem padrão em pt-BR. */

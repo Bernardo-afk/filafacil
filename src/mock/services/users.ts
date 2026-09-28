@@ -6,13 +6,14 @@ import { maskCpf } from '../../lib/cpf'
 import { toE164, isValidBrazilianMobile } from '../../lib/phone'
 import { isValidPassword } from '../../lib/password'
 import { nowISO } from '../../lib/id'
-import { findAll, upsert, getCollection, setCollection, clearStoredRefreshToken } from '../storage'
+import { findAll, upsert, clearStoredRefreshToken } from '../storage'
 import { apiError } from '../errors'
 import { requireActiveUser, requireSession } from '../guard'
 import { useSessionStore } from '../session'
 import { otpService } from './otp'
 import { audit } from './audit'
-import type { RefreshToken, User } from '../types'
+import { revokeAllRefreshTokensFor } from './refreshTokens'
+import type { User } from '../types'
 
 export interface SafeUser {
   id: string
@@ -161,14 +162,8 @@ export const usersService = {
     const user = currentSessionUser()
     const now = nowISO()
     upsert('users', { ...user, tokenVersion: user.tokenVersion + 1, updatedAt: now })
+    revokeAllRefreshTokensFor(user.id)
 
-    const collection = getCollection<RefreshToken>('refreshTokens')
-    for (const token of Object.values(collection)) {
-      if (token.userId === user.id && !token.revokedAt) {
-        collection[token.id] = { ...token, revokedAt: now, updatedAt: now }
-      }
-    }
-    setCollection('refreshTokens', collection)
     audit.log({
       actorUserId: user.id,
       establishmentId: null,

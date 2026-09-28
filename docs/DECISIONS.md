@@ -99,3 +99,25 @@ A spec (história 34) diz que uma organização nova sem assinatura ganha uma `T
 ### 23 — `entitlements` já era "sem cache" desde a Fundação — nada mudou aqui
 A spec descreve "trocar de plano vale na hora, sem deploy" como se fosse uma regra nova desta história, mas `entitlements.assertFeature`/`assertUnitLimit` (Fase 0) já relê `subscriptions`/`planFeatures` do zero a cada chamada. Resultado: os cenários "downgrade retira/upgrade libera o recurso na hora" já funcionam automaticamente assim que `adminPlansService.changeOrganizationPlan` grava a nova assinatura — testados diretamente contra `entitlements`, já que as telas de fichas técnicas (história 31) e fila de espera (história 21) ainda não existem pra exercitar isso pela UI.
 **Afeta:** nenhum código novo; só o teste (`adminPlans.test.ts`) documenta o comportamento.
+
+## História 36 — Usuários da plataforma (Admin)
+
+### 24 — "Proteção do último admin" cobre dois casos com códigos distintos
+A spec junta "admin não pode suspender a si mesmo **nem** remover o último `PLATFORM_ADMIN` ativo" numa frase só, com um `422` genérico. São duas regras diferentes (a 1ª nunca depende de quantos admins existem; a 2ª só dispara quando o alvo é o único admin ativo), então viraram dois códigos: `CANNOT_SUSPEND_SELF` (em `suspend`) e `LAST_ADMIN_PROTECTED` (em `suspend` e em `changeRole`, quando o papel do último admin ativo mudaria para outro). Ambos continuam `422`, como a spec pede.
+**Afeta:** `src/mock/errors.ts`, `src/mock/services/adminUsers.ts`.
+
+### 25 — Motivo de suspensão de usuário só existe no `AuditLog`, não no registro
+Diferente de `Establishment` (que ganhou `statusReason` na história 34), a entidade `User` (spec §3) não tem uma coluna de motivo. `POST /admin/users/:id/suspend` recebe `{ reason }`, mas ele só é gravado no `AuditLog.after` daquela troca de status — não existe um "motivo atual" exposto no perfil do usuário suspenso, só no histórico.
+**Afeta:** `src/mock/services/adminUsers.ts` (`suspend`).
+
+### 26 — Revogação de refresh token virou helper compartilhado
+`usersService.logoutAllDevices` (história 13) e `adminUsersService.suspend` (história 36) precisam do mesmo passo — revogar todo `RefreshToken` de um usuário —, só que um age sobre a própria sessão e o outro sobre a de outra pessoa. Extraído `revokeAllRefreshTokensFor(userId)` em `src/mock/services/refreshTokens.ts` pros dois chamarem, em vez de duplicar o loop.
+**Afeta:** `src/mock/services/refreshTokens.ts`, `src/mock/services/users.ts`, `src/mock/services/adminUsers.ts`.
+
+### 27 — Trocar de papel sempre substitui o conjunto de vínculos inteiro
+A spec (`PATCH /admin/users/:id { role, memberships[] }`) não deixa claro se `memberships[]` é um PATCH incremental ou o conjunto final. Adotado: substitui tudo — os vínculos antigos do usuário são apagados e os do payload (se o novo papel for `STAFF`) tomam o lugar. Um usuário deixando de ser `STAFF` perde todos os vínculos (fazem sentido só pra `STAFF`, spec §3 `Membership`). Mais simples de raciocinar no admin e evita vínculo órfão de um papel que a pessoa não tem mais.
+**Afeta:** `src/mock/services/adminUsers.ts` (`changeRole`).
+
+### 28 — Listagens de admin (usuários/estabelecimentos) não paginam de verdade
+A spec história 36 cita "listagem paginada" nos casos de borda, mas não dá tamanho de página nem cenário Gherkin pra isso — mesma situação já aceita na história 34 (`EstablishmentsListScreen`, sem paginação real). Como o seed tem poucas dezenas de registros no máximo, `adminUsersService.list`/`adminEstablishmentsService.list` devolvem a lista inteira já filtrada; paginação de verdade fica pra quando o volume de dados justificar.
+**Afeta:** `src/mock/services/adminUsers.ts`, `src/features/admin/UsersListScreen.tsx`.
