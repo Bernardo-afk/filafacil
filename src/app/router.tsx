@@ -7,6 +7,34 @@ import { WelcomeScreen } from '../features/auth/WelcomeScreen'
 import { SignupScreen } from '../features/auth/SignupScreen'
 import { LoginScreen } from '../features/auth/LoginScreen'
 import { StaffEstablishmentChooser } from '../features/auth/StaffEstablishmentChooser'
+import { RequireAuth } from '../features/auth/RequireAuth'
+import { RequireRole } from '../features/auth/RequireRole'
+import { ProfileFullScreen } from '../features/profile/ProfileFullScreen'
+import { EditProfileScreen } from '../features/profile/EditProfileScreen'
+import { AccountManagementScreen } from '../features/profile/AccountManagementScreen'
+import { AddressesScreen } from '../features/profile/AddressesScreen'
+import { AddressFormScreen } from '../features/profile/AddressFormScreen'
+import { EstablishmentsListScreen } from '../features/admin/EstablishmentsListScreen'
+import { EstablishmentDetailScreen } from '../features/admin/EstablishmentDetailScreen'
+import { EstablishmentFormScreen } from '../features/admin/EstablishmentFormScreen'
+import { PlansListScreen } from '../features/admin/PlansListScreen'
+import { PlanFormScreen } from '../features/admin/PlanFormScreen'
+import { UsersListScreen } from '../features/admin/UsersListScreen'
+import { UserDetailScreen } from '../features/admin/UserDetailScreen'
+import { RestaurantDetailScreen } from '../features/discovery/RestaurantDetailScreen'
+import { HomeScreen } from '../features/discovery/HomeScreen'
+import { RestaurantsScreen } from '../features/discovery/RestaurantsScreen'
+import { LocationPermissionScreen } from '../features/discovery/LocationPermissionScreen'
+import { EstablishmentScreen } from '../features/manager/EstablishmentScreen'
+import { HoursScreen } from '../features/manager/HoursScreen'
+import { MenuScreen as ManagerMenuScreen } from '../features/manager/MenuScreen'
+import { PromotionsScreen } from '../features/manager/PromotionsScreen'
+import { MenuScreen as CustomerMenuScreen } from '../features/menu/MenuScreen'
+import { MenuAvailabilityScreen } from '../features/attendant/MenuAvailabilityScreen'
+import { RecipeSheetsScreen } from '../features/manager/RecipeSheetsScreen'
+import { FloorPlanScreen } from '../features/manager/FloorPlanScreen'
+import { TablesScreen } from '../features/manager/TablesScreen'
+import { WaitlistScreen } from '../features/manager/WaitlistScreen'
 import { Placeholder } from '../components/ui/Placeholder'
 
 // HashRouter (spec §4 decisão 11, §13.1): GitHub Pages não sabe devolver
@@ -21,40 +49,75 @@ export const router = createHashRouter([
     path: '/app',
     element: <CustomerLayout />,
     children: [
-      { index: true, element: <Placeholder title="Início" story="11" /> },
-      { path: 'restaurantes', element: <Placeholder title="Restaurantes" story="11" /> },
-      { path: 'r/:establishmentId', element: <Placeholder title="Página do restaurante" story="12" /> },
-      { path: 'r/:establishmentId/cardapio', element: <Placeholder title="Cardápio" story="03" /> },
+      { index: true, element: <HomeScreen /> },
+      { path: 'restaurantes', element: <RestaurantsScreen /> },
+      { path: 'localizacao', element: <LocationPermissionScreen /> },
+      { path: 'r/:establishmentId', element: <RestaurantDetailScreen /> },
+      { path: 'r/:establishmentId/cardapio', element: <CustomerMenuScreen /> },
       { path: 'pedidos', element: <Placeholder title="Pedidos" /> },
-      { path: 'perfil', element: <Placeholder title="Perfil" story="13" /> },
+      {
+        path: 'perfil',
+        element: <RequireAuth />,
+        children: [
+          { index: true, element: <ProfileFullScreen /> },
+          { path: 'editar', element: <EditProfileScreen /> },
+          { path: 'conta', element: <AccountManagementScreen /> },
+          { path: 'enderecos', element: <AddressesScreen /> },
+          { path: 'enderecos/novo', element: <AddressFormScreen /> },
+          { path: 'enderecos/:addressId/editar', element: <AddressFormScreen /> },
+        ],
+      },
     ],
   },
   {
     path: '/atendente',
     element: <AttendantLayout />,
-    children: [{ path: 'cardapio', element: <Placeholder title="Disponibilidade do cardápio" story="19" /> }],
+    children: [
+      {
+        element: <RequireRole roles={['STAFF']} />,
+        children: [{ path: 'cardapio', element: <MenuAvailabilityScreen /> }],
+      },
+    ],
   },
   {
     path: '/gestor',
     element: <ManagerLayout />,
     children: [
-      { index: true, element: <Placeholder title="Cardápio" story="28" /> },
-      { path: 'cardapio', element: <Placeholder title="Cardápio" story="28" /> },
-      { path: 'promocoes', element: <Placeholder title="Promoções" story="29" /> },
-      { path: 'fichas-tecnicas', element: <Placeholder title="Fichas técnicas" story="31" /> },
-      { path: 'mesas', element: <Placeholder title="Mesas e locais" story="20" /> },
-      { path: 'fila', element: <Placeholder title="Fila de espera" story="21" /> },
-      { path: 'estabelecimento', element: <Placeholder title="Estabelecimento" story="12" /> },
+      {
+        element: <RequireRole roles={['STAFF']} />,
+        children: [
+          { index: true, element: <ManagerMenuScreen /> },
+          { path: 'cardapio', element: <ManagerMenuScreen /> },
+          { path: 'promocoes', element: <PromotionsScreen /> },
+          { path: 'fichas-tecnicas', element: <RecipeSheetsScreen /> },
+          { path: 'planta', element: <FloorPlanScreen /> },
+          { path: 'mesas', element: <TablesScreen /> },
+          { path: 'fila', element: <WaitlistScreen /> },
+          { path: 'estabelecimento', element: <EstablishmentScreen /> },
+          { path: 'horarios', element: <HoursScreen /> },
+        ],
+      },
     ],
   },
   {
     path: '/admin',
     element: <AdminLayout />,
     children: [
-      { index: true, element: <Placeholder title="Estabelecimentos" story="34" /> },
-      { path: 'estabelecimentos', element: <Placeholder title="Estabelecimentos" story="34" /> },
-      { path: 'usuarios', element: <Placeholder title="Usuários" story="36" /> },
-      { path: 'planos', element: <Placeholder title="Planos" story="37" /> },
+      {
+        element: <RequireRole roles={['PLATFORM_ADMIN']} />,
+        children: [
+          { index: true, element: <EstablishmentsListScreen /> },
+          { path: 'estabelecimentos', element: <EstablishmentsListScreen /> },
+          { path: 'estabelecimentos/novo', element: <EstablishmentFormScreen /> },
+          { path: 'estabelecimentos/:establishmentId', element: <EstablishmentDetailScreen /> },
+          { path: 'estabelecimentos/:establishmentId/editar', element: <EstablishmentFormScreen /> },
+          { path: 'usuarios', element: <UsersListScreen /> },
+          { path: 'usuarios/:userId', element: <UserDetailScreen /> },
+          { path: 'planos', element: <PlansListScreen /> },
+          { path: 'planos/novo', element: <PlanFormScreen /> },
+          { path: 'planos/:planId/editar', element: <PlanFormScreen /> },
+        ],
+      },
     ],
   },
 ])

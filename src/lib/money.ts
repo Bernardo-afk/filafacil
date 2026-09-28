@@ -10,7 +10,13 @@ export function centsFromReais(reais: number): number {
   return Math.round(reais * 100)
 }
 
-/** Aplica um desconto percentual (1–100) em centavos, arredondando para baixo. */
+/** Arredondamento "half up" (spec história 29/31: `round_half_up`, nunca banker's rounding). */
+export function roundHalfUp(value: number): number {
+  return Math.floor(value + 0.5)
+}
+
+/** Aplica um desconto percentual (1–100) em centavos: `price − round_half_up(price × pct / 100)` (spec história 29). */
 export function applyPercentDiscount(priceCents: number, percent: number): number {
-  return Math.max(0, Math.floor(priceCents * (1 - percent / 100)))
+  const discount = roundHalfUp((priceCents * percent) / 100)
+  return Math.max(0, priceCents - discount)
 }

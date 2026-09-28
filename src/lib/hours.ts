@@ -10,7 +10,8 @@ export interface DayWindow {
   closesAt: string | null
 }
 
-function partsInTimezone(at: Date, timezone: string): { weekday: number; time: string; date: string } {
+/** Exportado pra promoções (história 29) reaproveitarem o mesmo cálculo de dia/hora local. */
+export function partsInTimezone(at: Date, timezone: string): { weekday: number; time: string; date: string } {
   const formatter = new Intl.DateTimeFormat('en-US', {
     timeZone: timezone,
     weekday: 'short',
