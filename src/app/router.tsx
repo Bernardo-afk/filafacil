@@ -8,11 +8,15 @@ import { SignupScreen } from '../features/auth/SignupScreen'
 import { LoginScreen } from '../features/auth/LoginScreen'
 import { StaffEstablishmentChooser } from '../features/auth/StaffEstablishmentChooser'
 import { RequireAuth } from '../features/auth/RequireAuth'
+import { RequireRole } from '../features/auth/RequireRole'
 import { ProfileFullScreen } from '../features/profile/ProfileFullScreen'
 import { EditProfileScreen } from '../features/profile/EditProfileScreen'
 import { AccountManagementScreen } from '../features/profile/AccountManagementScreen'
 import { AddressesScreen } from '../features/profile/AddressesScreen'
 import { AddressFormScreen } from '../features/profile/AddressFormScreen'
+import { EstablishmentsListScreen } from '../features/admin/EstablishmentsListScreen'
+import { EstablishmentDetailScreen } from '../features/admin/EstablishmentDetailScreen'
+import { EstablishmentFormScreen } from '../features/admin/EstablishmentFormScreen'
 import { Placeholder } from '../components/ui/Placeholder'
 
 // HashRouter (spec §4 decisão 11, §13.1): GitHub Pages não sabe devolver
@@ -68,10 +72,18 @@ export const router = createHashRouter([
     path: '/admin',
     element: <AdminLayout />,
     children: [
-      { index: true, element: <Placeholder title="Estabelecimentos" story="34" /> },
-      { path: 'estabelecimentos', element: <Placeholder title="Estabelecimentos" story="34" /> },
-      { path: 'usuarios', element: <Placeholder title="Usuários" story="36" /> },
-      { path: 'planos', element: <Placeholder title="Planos" story="37" /> },
+      {
+        element: <RequireRole roles={['PLATFORM_ADMIN']} />,
+        children: [
+          { index: true, element: <EstablishmentsListScreen /> },
+          { path: 'estabelecimentos', element: <EstablishmentsListScreen /> },
+          { path: 'estabelecimentos/novo', element: <EstablishmentFormScreen /> },
+          { path: 'estabelecimentos/:establishmentId', element: <EstablishmentDetailScreen /> },
+          { path: 'estabelecimentos/:establishmentId/editar', element: <EstablishmentFormScreen /> },
+          { path: 'usuarios', element: <Placeholder title="Usuários" story="36" /> },
+          { path: 'planos', element: <Placeholder title="Planos" story="37" /> },
+        ],
+      },
     ],
   },
 ])

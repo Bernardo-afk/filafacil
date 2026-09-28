@@ -67,3 +67,21 @@ Nenhuma história anterior exigia sessão pra navegar: o "Explorar restaurantes"
 ### 16 — "Sair de todos os dispositivos" também encerra a sessão local
 A spec descreve o cenário com 2 aparelhos, mas o app roda num navegador só por sessão de teste — não dá pra ter 2 abas logadas como "aparelhos" diferentes de forma realista. Decisão: `usersService.logoutAllDevices()` revoga **todo** `RefreshToken` do usuário (incluindo o deste navegador) e também limpa a sessão local (`clearSession()`), já que este aparelho está entre "todos". Sem isso, a tela continuaria mostrando dados de uma sessão cujo refresh token já foi revogado.
 **Afeta:** `src/mock/services/users.ts`, `src/features/profile/AccountManagementScreen.tsx`.
+
+## História 34 — Estabelecimentos (Admin)
+
+### 17 — "Painel de detalhe" e o formulário "Novo" viram telas próprias
+A spec descreve um painel de detalhe (provavelmente lateral/slide-over no protótipo) e diz explicitamente que o formulário do botão "Novo" **não está desenhado** (❌, spec história 34). Sem o protótipo pra copiar a interação, seguimos o mesmo padrão já usado nas outras telas do app (rota própria em vez de modal/painel lateral — igual ao `AddressFormScreen` da história 13): `/admin/estabelecimentos/:id` (detalhe), `/admin/estabelecimentos/novo` e `/admin/estabelecimentos/:id/editar`.
+**Afeta:** `src/features/admin/EstablishmentDetailScreen.tsx`, `src/features/admin/EstablishmentFormScreen.tsx`, `src/app/router.tsx`.
+
+### 18 — Motivo obrigatório só ao suspender, não ao reativar
+A spec escreve "`ACTIVE ↔ SUSPENDED` (motivo obrigatório)" com uma seta de mão dupla, o que é ambíguo sobre exigir motivo também ao reativar (`SUSPENDED → ACTIVE`). O cenário Gherkin da spec só testa "Motivo obrigatório para suspender" (a ida pra `SUSPENDED`). Adotado: motivo obrigatório apenas na transição **para** `SUSPENDED`; reativar (`SUSPENDED`/`DEACTIVATED` → `ACTIVE`) não pede motivo, e o `statusReason` é limpo ao sair de `SUSPENDED`.
+**Afeta:** `src/mock/services/adminEstablishments.ts` (`changeStatus`).
+
+### 19 — Limite de unidades conta todo estabelecimento da organização, não só os ACTIVE
+`Establishment` não tem soft-delete, e a spec não diz se `MAX_UNITS` conta unidades suspensas/em configuração. Adotado: o contador de "unidades" da organização, usado por `entitlements.assertUnitLimit`, soma **todos** os estabelecimentos vinculados àquela `organizationId`, qualquer que seja o status — uma unidade suspensa continua ocupando vaga do plano até ser desativada/excluída (não há exclusão na Sprint 1).
+**Afeta:** `src/mock/services/adminEstablishments.ts` (`create`).
+
+### 20 — Rotas `/admin/*` ganham guard de papel (`RequireRole`)
+Igual à decisão 15 (história 13), mas agora por **papel**, não só por sessão: `adminEstablishmentsService` já barra quem não é `PLATFORM_ADMIN` com `403 FORBIDDEN` (spec, cenário "Apenas admin acessa"), então a tela crasharia ao chamar o service sem guard nenhum — inclusive pelos atalhos de desenvolvimento da `WelcomeScreen`, que linkam direto pra `/admin` sem login. Criado `src/features/auth/RequireRole.tsx`: sem sessão manda pro `/login`, com sessão mas papel errado manda pro `/` (a tela sabe formular sua própria mensagem de "não autorizado" quando a história correspondente existir).
+**Afeta:** `src/app/router.tsx`, `src/features/auth/RequireRole.tsx`.
