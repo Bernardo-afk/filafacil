@@ -1,0 +1,51 @@
+# Decisões registradas
+
+Formato: **# — Tema** · decisão adotada · por quê · onde afeta. Segue a regra da spec §0 item 6: adota o default indicado, registra aqui, segue em frente.
+
+## Fase 0 — Fundação
+
+### 1 — Protótipo Figma Make não disponível
+Não recebemos `reference/figma-make/` (código-fonte do protótipo). Seguimos as descrições escritas da spec (`docs/SPEC-SPRINT1.md`) como fonte de verdade visual e de comportamento, como a própria spec prevê (§0 item 4: "Onde estiver ⚠️ ou ❌ e o Figma estiver acessível, consulte o Figma antes de decidir. Se não estiver, siga a proposta do documento").
+**Afeta:** todas as telas construídas nas histórias seguintes. Se o protótipo real aparecer depois, comparar e ajustar.
+
+### 2 — 🔶 CPF no cadastro
+Mantido como passo curto extra "Seu CPF" (default da spec §10.1 #2). Implementação chega na história 01.
+
+### 3 — 🔶 Item esgotado: visível ou oculto
+Visível e desabilitado com selo "Esgotado" (default da spec §10.1 #9, RF10). Já aplicado no seed: X-Bacon (`isAvailable: false`).
+
+### 4 — Organizações não mapeadas 1:1 pela spec
+A spec (§8) nomeia só 3 organizações (Grupo Bar do Zé, Restaurantes Bela Vista, Boteco Corp) sem dizer quais dos 9 estabelecimentos do seed pertencem a cada uma, além das 3 unidades "Bar do Zé" já explícitas. Decisão: Grupo Bar do Zé fica com as 3 unidades "Bar do Zé" (Cambuí/Taquaral/Centro, como a spec diz); Restaurantes Bela Vista (Start, 1 unidade) fica com o Restaurante São Paulo; Boteco Corp (Business, 2 unidades) fica com Seu Joaquim Bar e Boteco da Vila; os estabelecimentos avulsos restantes (Bar do Mestre, Cantina Universitária, Lancheria do Zé) ganham cada um a própria organização no plano Start, seguindo a regra geral da spec §3 ("estabelecimento avulso ganha uma organização própria").
+**Afeta:** `src/mock/seed/organizations.ts`, `establishments.ts`, `subscriptions.ts`. História 34/37.
+
+### 5 — Bar do Mestre no plano Pro (não Start)
+Como não há organização própria nomeada para o Bar do Mestre com um plano definido pela spec, e ele é o único estabelecimento com cardápio, promoções, fichas técnicas, mesas e fila completos no seed (o "estabelecimento de demonstração"), colocamos a organização dele no plano **Pro** — necessário para os recursos `RECIPE_SHEETS` e `WAITLIST` (só existem em Pro/Business, spec §10.1 #15) funcionarem na demonstração sem precisar trocar de plano manualmente antes de testar as histórias 21/31.
+**Afeta:** `src/mock/seed/subscriptions.ts`. Histórias 21, 29, 31, 37.
+
+### 6 — Lucas Torres também gestor do Bar do Mestre
+A spec nota uma inconsistência do protótipo (§10.3 #1): "Bar do Mestre" (usado pelo cliente/atendente) e "Bar do Zé" (usado pelo seletor do gestor) podem ser o mesmo lugar, mas o `mock.ts` original tem os dois como estabelecimentos distintos. Como só a organização de Lucas (Grupo Bar do Zé) tinha um gestor nomeado, e o Bar do Mestre é o estabelecimento com os dados mais completos para testar as telas de gestor, demos a Lucas também um `Membership(MANAGER)` direto no Bar do Mestre.
+**Afeta:** `src/mock/seed/memberships.ts`.
+
+### 7 — Grid da planta do Bar do Mestre expandido para 6×4
+O default do `FloorPlan` (spec §3) é 6×3, que cobre exatamente as 18 mesas do Salão (M01–M18). Para caber a Área externa (M21, M22) e o Balcão (BLC) na mesma planta (1 `FloorPlan` por estabelecimento, spec §3), usamos `gridRows: 4`: a 4ª linha tem a área externa e o balcão.
+**Afeta:** `src/mock/seed/floorplan.ts`. História 20.
+
+### 8 — Ficha técnica do hambúrguer: unidade de compra UN, não G
+A tabela da spec (§8) mistura "hambúrguer 160 g (R$ 7,20 por un)" — um peso descritivo com um custo por unidade. Para o custo bater com o total de R$ 11,40 informado, tratamos "hambúrguer" e "queijo cheddar (fatia)" como ingredientes comprados e consumidos por unidade (UN), não por grama. O molho especial é comprado em KG e consumido em G (conversão dentro da mesma dimensão, permitida pela spec RF15).
+**Afeta:** `src/mock/seed/ingredients.ts`. História 31.
+
+### 9 — IDs do seed são slugs legíveis, não UUID
+A spec pede `id: UUID (PK)` gerado com `crypto.randomUUID()` para toda entidade. Isso vale para tudo criado em tempo de execução pelos mock services (`src/lib/id.ts`). Para os dados fixos do seed (§8), usamos IDs legíveis (`user-admin`, `estab-bar-do-mestre`...) para poder referenciar entidades entre arquivos sem uma etapa extra de "resolver por nome"; nada no app valida formato de UUID, então isso não quebra nenhuma regra funcional.
+**Afeta:** `src/mock/seed/**`.
+
+### 10 — Fontes self-hosted via `@fontsource`, não Google Fonts CDN
+A spec exige que o app funcione 100% offline durante a apresentação (§0.2: "continua funcionando offline durante a apresentação"). Um `<link>` para `fonts.googleapis.com` quebraria isso (e, à parte da spec, travou a verificação em navegador nesta sessão — a aba ficava esperando a fonte externa carregar). Trocado por `@fontsource/inter` e `@fontsource/manrope`, importados em `src/index.css`, empacotados pelo Vite.
+**Afeta:** `src/index.css`, `index.html`, `package.json`.
+
+### 11 — `npm run seed:reset` só orienta; o reset real é o botão no app
+`resetMockData()` limpa `localStorage`, que só existe dentro do navegador — não é acessível a partir de um script Node fora dele. `npm run seed:reset` (`scripts/seed-reset-info.mjs`) imprime instruções; o reset de verdade é o botão "Resetar dados" (visível em modo dev na tela de boas-vindas) ou chamar `resetMockData()` no console do navegador com o app aberto.
+**Afeta:** `package.json`, `scripts/seed-reset-info.mjs`, `src/features/auth/WelcomeScreen.tsx`.
+
+### 12 — Verificação em navegador não pôde ser confirmada nesta sessão
+O Browser pane usado para testar (ferramenta do ambiente, não parte do app) travou consistentemente ao carregar o bundle JS (tanto em `npm run dev` quanto em `vite preview`), mesmo com `curl` confirmando respostas HTTP 200 instantâneas e corretas do mesmo servidor. `typecheck`, `lint`, os 17 testes unitários e `npm run build` passam limpos. Recomenda-se rodar `npm run dev` localmente para confirmar visualmente antes da próxima história.
+**Afeta:** processo de verificação, não o código do app.

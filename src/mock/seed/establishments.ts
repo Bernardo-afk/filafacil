@@ -1,0 +1,195 @@
+// Estabelecimentos (spec §3 Establishment, §8). Coordenadas fictícias em
+// Campinas-SP a partir do ponto de referência -22.9056, -47.0608, deslocadas
+// por offsetMeters (spec §8 pede um helper assim; a direção do deslocamento
+// não é especificada, então usamos norte por simplicidade).
+
+import type { Establishment } from '../types'
+import { offsetMeters } from '../../lib/geo'
+import { ESTABLISHMENT_IDS, ORG_IDS, USER_IDS } from './ids'
+
+const NOW = new Date().toISOString()
+const REFERENCE = { lat: -22.9056, lng: -47.0608 }
+
+function point(distanceMeters: number) {
+  return offsetMeters(REFERENCE.lat, REFERENCE.lng, distanceMeters, 0)
+}
+
+function establishment(overrides: Partial<Establishment> & Pick<Establishment, 'id' | 'organizationId' | 'name'>): Establishment {
+  return {
+    shortName: overrides.name,
+    unitLabel: null,
+    category: 'BAR',
+    description: '',
+    logoUrl: null,
+    coverPhotoUrl: null,
+    phone: null,
+    email: null,
+    website: null,
+    status: 'ACTIVE',
+    statusReason: null,
+    street: '',
+    number: '',
+    complement: null,
+    neighborhood: '',
+    city: 'Campinas',
+    state: 'SP',
+    zip: '13000000',
+    lat: null,
+    lng: null,
+    timezone: 'America/Sao_Paulo',
+    tags: [],
+    ratingAvg: 0,
+    ratingCount: 0,
+    waitMinMinutes: null,
+    waitMaxMinutes: null,
+    highDemand: false,
+    ordersPausedAt: null,
+    ordersPausedUntil: null,
+    ordersPauseReason: null,
+    avgTableTurnoverMin: 45,
+    menuVersion: 0,
+    createdBy: USER_IDS.ADMIN,
+    createdAt: NOW,
+    updatedAt: NOW,
+    ...overrides,
+  }
+}
+
+export function buildEstablishments(): Establishment[] {
+  return [
+    establishment({
+      id: ESTABLISHMENT_IDS.BAR_DO_MESTRE,
+      organizationId: ORG_IDS.BAR_DO_MESTRE,
+      name: 'Bar do Mestre',
+      category: 'BAR',
+      description: 'Cervejas artesanais e petiscos num ambiente descontraído.',
+      street: 'Rua das Flores',
+      number: '148',
+      neighborhood: 'Centro',
+      ...point(350),
+      tags: ['Cervejas artesanais', 'Petiscos'],
+      ratingAvg: 4.7,
+      ratingCount: 312,
+      waitMinMinutes: 12,
+      waitMaxMinutes: 18,
+      phone: '+551933334444',
+      email: 'contato@bardomestre.com.br',
+    }),
+    establishment({
+      id: ESTABLISHMENT_IDS.SEU_JOAQUIM,
+      organizationId: ORG_IDS.BOTECO_CORP,
+      name: 'Seu Joaquim Bar',
+      category: 'BAR',
+      street: 'Av. Brasil',
+      number: '512',
+      neighborhood: 'Barão Geraldo',
+      ...point(800),
+      tags: ['Chopes', 'Botequim'],
+      ratingAvg: 4.3,
+      ratingCount: 189,
+      waitMinMinutes: 25,
+      waitMaxMinutes: 30,
+      highDemand: true,
+    }),
+    establishment({
+      id: ESTABLISHMENT_IDS.CANTINA,
+      organizationId: ORG_IDS.CANTINA,
+      name: 'Cantina Universitária',
+      category: 'CANTINA',
+      street: 'Campus Unicamp',
+      number: 's/n',
+      neighborhood: 'Cidade Universitária',
+      ...point(1200),
+      tags: ['Almoço', 'Lanches'],
+      ratingAvg: 4.5,
+      ratingCount: 421,
+      waitMinMinutes: 15,
+      waitMaxMinutes: 20,
+    }),
+    establishment({
+      id: ESTABLISHMENT_IDS.BOTECO_DA_VILA,
+      organizationId: ORG_IDS.BOTECO_CORP,
+      name: 'Boteco da Vila',
+      category: 'BAR',
+      street: 'Rua da Vila',
+      number: '88',
+      neighborhood: 'Jardim das Flores',
+      ...point(600),
+      tags: ['Rodízio de petiscos', 'Happy Hour'],
+      ratingAvg: 4.6,
+      ratingCount: 256,
+      waitMinMinutes: 10,
+      waitMaxMinutes: 15,
+    }),
+    establishment({
+      id: ESTABLISHMENT_IDS.LANCHERIA,
+      organizationId: ORG_IDS.LANCHERIA,
+      name: 'Lancheria do Zé',
+      category: 'SNACK_BAR',
+      street: 'Rua 7 de Setembro',
+      number: '203',
+      neighborhood: 'Centro',
+      ...point(450),
+      tags: ['Hambúrgueres', 'Combos'],
+      ratingAvg: 4.4,
+      ratingCount: 178,
+      waitMinMinutes: 8,
+      waitMaxMinutes: 12,
+    }),
+    establishment({
+      id: ESTABLISHMENT_IDS.BAR_DO_ZE_CAMBUI,
+      organizationId: ORG_IDS.GRUPO_BAR_DO_ZE,
+      name: 'Bar do Zé',
+      shortName: 'Bar do Zé',
+      unitLabel: 'Cambuí',
+      category: 'BAR',
+      street: 'Rua Augusta',
+      number: '742',
+      neighborhood: 'Centro', // ⚠️ endereço não definido no protótipo (spec §8)
+      ...point(220),
+      tags: ['Cervejas', 'Petiscos', 'Happy Hour'],
+      ratingAvg: 4.8,
+      ratingCount: 512,
+      waitMinMinutes: 15,
+      waitMaxMinutes: 20,
+      ordersPausedAt: NOW,
+      ordersPausedUntil: null, // "pedidos pausados" até reativar manualmente
+      ordersPauseReason: 'Cozinha sobrecarregada',
+      createdBy: USER_IDS.LUCAS,
+    }),
+    establishment({
+      id: ESTABLISHMENT_IDS.BAR_DO_ZE_TAQUARAL,
+      organizationId: ORG_IDS.GRUPO_BAR_DO_ZE,
+      name: 'Bar do Zé',
+      shortName: 'Bar do Zé',
+      unitLabel: 'Taquaral',
+      category: 'BAR',
+      street: 'Av. Guilherme Campos', // ⚠️ endereço não definido no protótipo
+      number: '1000',
+      neighborhood: 'Taquaral',
+      lat: REFERENCE.lat,
+      lng: REFERENCE.lng,
+      createdBy: USER_IDS.LUCAS,
+    }),
+    establishment({
+      id: ESTABLISHMENT_IDS.BAR_DO_ZE_CENTRO,
+      organizationId: ORG_IDS.GRUPO_BAR_DO_ZE,
+      name: 'Bar do Zé',
+      shortName: 'Bar do Zé',
+      unitLabel: 'Centro',
+      category: 'BAR',
+      status: 'SETUP', // "em configuração" — sem endereço/lat/lng ainda (spec §8, §10.1 #20)
+      createdBy: USER_IDS.LUCAS,
+    }),
+    establishment({
+      id: ESTABLISHMENT_IDS.RESTAURANTE_SP,
+      organizationId: ORG_IDS.BELA_VISTA,
+      name: 'Restaurante São Paulo',
+      category: 'RESTAURANT',
+      status: 'SUSPENDED',
+      statusReason: 'Violação das regras de uso da plataforma (seed de demonstração).',
+      city: 'São Paulo',
+      state: 'SP',
+    }),
+  ]
+}
