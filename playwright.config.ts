@@ -7,11 +7,11 @@ export default defineConfig({
   retries: 0,
   reporter: 'list',
   use: {
-    baseURL: 'http://localhost:5173',
+    baseURL: 'http://localhost:5173/filafacil/',
   },
   webServer: {
     command: 'npm run dev',
-    url: 'http://localhost:5173',
+    url: 'http://localhost:5173/filafacil/',
     reuseExistingServer: !process.env.CI,
   },
   projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
