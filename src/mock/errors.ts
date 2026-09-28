@@ -24,6 +24,7 @@ export type MockApiErrorCode =
   | 'SESSION_EXPIRED'
   | 'CURRENT_PASSWORD_INVALID'
   | 'ADDRESS_LIMIT_REACHED'
+  | 'PLAN_INACTIVE'
 
 export interface MockApiErrorDetails {
   [field: string]: unknown
@@ -65,6 +66,7 @@ const MESSAGES: Record<MockApiErrorCode, string> = {
   SESSION_EXPIRED: 'Sua sessão expirou.',
   CURRENT_PASSWORD_INVALID: 'Senha atual incorreta.',
   ADDRESS_LIMIT_REACHED: 'Limite de 10 endereços atingido.',
+  PLAN_INACTIVE: 'Este plano está inativo e não pode ser atribuído.',
 }
 
 /** Atalho: `throw apiError('CPF_INVALID')` usa a mensagem padrão em pt-BR. */

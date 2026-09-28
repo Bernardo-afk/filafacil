@@ -8,7 +8,9 @@ import {
   adminEstablishmentsService,
   type AdminEstablishmentDetail,
 } from '../../mock/services/adminEstablishments'
+import { adminPlansService, type AdminPlanDetail } from '../../mock/services/adminPlans'
 import { isMockApiError } from '../../mock/errors'
+import { formatCents } from '../../lib/money'
 import type { Establishment } from '../../mock/types'
 
 const DATE_FORMAT = new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' })
@@ -37,6 +39,9 @@ export function EstablishmentDetailScreen() {
   const [suspendReason, setSuspendReason] = useState<string | null>(null)
   const [suspendError, setSuspendError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
+  const [changingPlan, setChangingPlan] = useState(false)
+  const [plans, setPlans] = useState<AdminPlanDetail[]>([])
+  const [planError, setPlanError] = useState<string | null>(null)
 
   const reload = useCallback(() => {
     if (!establishmentId) return
@@ -78,6 +83,24 @@ export function EstablishmentDetailScreen() {
     }
   }
 
+  function openPlanSwitcher() {
+    setPlanError(null)
+    setPlans(adminPlansService.list().filter((p) => p.plan.isActive))
+    setChangingPlan(true)
+  }
+
+  function switchPlan(planId: string) {
+    if (!detail) return
+    setPlanError(null)
+    try {
+      adminPlansService.changeOrganizationPlan(detail.establishment.organizationId, planId)
+      setChangingPlan(false)
+      reload()
+    } catch (err) {
+      setPlanError(errorMessage(err))
+    }
+  }
+
   const { establishment } = detail
 
   return (
@@ -104,6 +127,9 @@ export function EstablishmentDetailScreen() {
           <div className="flex items-center gap-2">
             <PlanBadge code={detail.planCode} />
             <StatusBadge status={establishment.status} />
+            <button type="button" onClick={openPlanSwitcher} className="text-sm font-semibold text-primary underline decoration-dotted">
+              Trocar plano
+            </button>
           </div>
         </div>
 
@@ -192,6 +218,33 @@ export function EstablishmentDetailScreen() {
                 Suspender
               </LoadingButton>
             </div>
+          </div>
+        </div>
+      )}
+
+      {changingPlan && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/40" role="dialog" aria-modal="true">
+          <div className="w-full max-w-sm rounded-[var(--radius-xl)] bg-card p-6">
+            <h3 className="mb-4 font-display text-lg font-bold text-foreground">Trocar plano da organização</h3>
+            <p className="mb-4 text-sm text-muted-foreground">Vale para todas as unidades de {detail.organizationName}.</p>
+            <div className="mb-4 flex flex-col gap-2">
+              {plans.map(({ plan }) => (
+                <button
+                  key={plan.id}
+                  type="button"
+                  onClick={() => switchPlan(plan.id)}
+                  disabled={plan.code === detail.planCode}
+                  className="flex items-center justify-between rounded-[var(--radius-md)] border border-border px-4 py-3 text-left text-sm font-semibold text-foreground disabled:opacity-40"
+                >
+                  {plan.name}
+                  <span className="text-muted-foreground">{formatCents(plan.priceCents)}</span>
+                </button>
+              ))}
+            </div>
+            {planError && <p className="mb-2 text-sm text-error">{planError}</p>}
+            <LoadingButton variant="secondary" className="w-full" onClick={() => setChangingPlan(false)}>
+              Cancelar
+            </LoadingButton>
           </div>
         </div>
       )}

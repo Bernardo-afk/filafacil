@@ -85,3 +85,17 @@ A spec escreve "`ACTIVE ↔ SUSPENDED` (motivo obrigatório)" com uma seta de m�
 ### 20 — Rotas `/admin/*` ganham guard de papel (`RequireRole`)
 Igual à decisão 15 (história 13), mas agora por **papel**, não só por sessão: `adminEstablishmentsService` já barra quem não é `PLATFORM_ADMIN` com `403 FORBIDDEN` (spec, cenário "Apenas admin acessa"), então a tela crasharia ao chamar o service sem guard nenhum — inclusive pelos atalhos de desenvolvimento da `WelcomeScreen`, que linkam direto pra `/admin` sem login. Criado `src/features/auth/RequireRole.tsx`: sem sessão manda pro `/login`, com sessão mas papel errado manda pro `/` (a tela sabe formular sua própria mensagem de "não autorizado" quando a história correspondente existir).
 **Afeta:** `src/app/router.tsx`, `src/features/auth/RequireRole.tsx`.
+
+## História 37 — Planos de assinatura (Admin)
+
+### 21 — "Trocar plano" mora no detalhe do estabelecimento, não numa tela de Organizações
+A spec propõe a ação "Plano atual"/"Trocar plano" "na tela da organização/estabelecimento", mas "Organizações" não é um item ativo da barra lateral nesta sprint (só Estabelecimentos, Usuários e Planos — spec história 34, "ative só os itens da sprint"). Como o `EstablishmentDetailScreen` (história 34) já mostra o selo de plano da organização, a ação "Trocar plano" foi anexada ali, valendo pra organização inteira (todas as unidades), em vez de criar uma tela de Organizações só pra isso.
+**Afeta:** `src/features/admin/EstablishmentDetailScreen.tsx`.
+
+### 22 — Trocar plano nunca deixa a assinatura nova como `TRIAL`
+A spec (história 34) diz que uma organização nova sem assinatura ganha uma `TRIAL` no plano Start — isso é o "plano padrão de quem ainda não escolheu nada". Mas uma troca deliberada feita pelo admin (`PUT /admin/organizations/:id/subscription`) não é esse caso: a nova assinatura nasce `ACTIVE` diretamente (cobrança real é Sprint 5, então `nextBillingAt` fica `null`). Isso também garante nunca existirem 2 assinaturas `ACTIVE`/`TRIAL` simultâneas pra mesma organização (caso de borda da spec, "índice parcial impede"): a anterior é cancelada (`status: CANCELED`, `canceledAt`) antes de criar a nova, na mesma chamada síncrona.
+**Afeta:** `src/mock/services/adminPlans.ts` (`changeOrganizationPlan`).
+
+### 23 — `entitlements` já era "sem cache" desde a Fundação — nada mudou aqui
+A spec descreve "trocar de plano vale na hora, sem deploy" como se fosse uma regra nova desta história, mas `entitlements.assertFeature`/`assertUnitLimit` (Fase 0) já relê `subscriptions`/`planFeatures` do zero a cada chamada. Resultado: os cenários "downgrade retira/upgrade libera o recurso na hora" já funcionam automaticamente assim que `adminPlansService.changeOrganizationPlan` grava a nova assinatura — testados diretamente contra `entitlements`, já que as telas de fichas técnicas (história 31) e fila de espera (história 21) ainda não existem pra exercitar isso pela UI.
+**Afeta:** nenhum código novo; só o teste (`adminPlans.test.ts`) documenta o comportamento.

@@ -17,6 +17,8 @@ import { AddressFormScreen } from '../features/profile/AddressFormScreen'
 import { EstablishmentsListScreen } from '../features/admin/EstablishmentsListScreen'
 import { EstablishmentDetailScreen } from '../features/admin/EstablishmentDetailScreen'
 import { EstablishmentFormScreen } from '../features/admin/EstablishmentFormScreen'
+import { PlansListScreen } from '../features/admin/PlansListScreen'
+import { PlanFormScreen } from '../features/admin/PlanFormScreen'
 import { Placeholder } from '../components/ui/Placeholder'
 
 // HashRouter (spec §4 decisão 11, §13.1): GitHub Pages não sabe devolver
@@ -81,7 +83,9 @@ export const router = createHashRouter([
           { path: 'estabelecimentos/:establishmentId', element: <EstablishmentDetailScreen /> },
           { path: 'estabelecimentos/:establishmentId/editar', element: <EstablishmentFormScreen /> },
           { path: 'usuarios', element: <Placeholder title="Usuários" story="36" /> },
-          { path: 'planos', element: <Placeholder title="Planos" story="37" /> },
+          { path: 'planos', element: <PlansListScreen /> },
+          { path: 'planos/novo', element: <PlanFormScreen /> },
+          { path: 'planos/:planId/editar', element: <PlanFormScreen /> },
         ],
       },
     ],
