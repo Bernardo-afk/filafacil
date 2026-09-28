@@ -15,7 +15,7 @@ import {
 import { apiError } from '../errors'
 import { newId, nowISO } from '../../lib/id'
 import { sha256Hex, randomOpaqueToken } from '../../lib/hash'
-import { isValidCpf, onlyDigits as onlyCpfDigits, mockEncryptCpf, mockHashCpf } from '../../lib/cpf'
+import { onlyDigits as onlyCpfDigits, mockEncryptCpf, mockHashCpf } from '../../lib/cpf'
 import { toE164, isValidBrazilianMobile } from '../../lib/phone'
 import { isValidPassword } from '../../lib/password'
 import { otpService } from './otp'
@@ -99,7 +99,8 @@ export const authService = {
     const data = parsed.data
 
     if (!data.acceptTerms) throw apiError('TERMS_REQUIRED', 400)
-    if (!isValidCpf(data.cpf)) throw apiError('CPF_INVALID', 400)
+    // BYPASS TEMPORÁRIO (pedido explícito do usuário, app 100% mock): não exige
+    // dígito verificador válido, só o formato de 11 dígitos (já checado no zod).
 
     const cpfDigits = onlyCpfDigits(data.cpf)
     const cpfHash = await mockHashCpf(cpfDigits)

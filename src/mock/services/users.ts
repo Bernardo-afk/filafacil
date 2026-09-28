@@ -149,9 +149,8 @@ export const usersService = {
 
   async changePassword(input: { currentPassword: string; newPassword: string }): Promise<void> {
     const user = currentSessionUser()
-    if (!user.passwordHash || user.passwordHash !== `mock:${input.currentPassword}`) {
-      throw apiError('CURRENT_PASSWORD_INVALID', 401)
-    }
+    // BYPASS TEMPORÁRIO (pedido explícito do usuário, app 100% mock): não exige
+    // mais a senha atual correta pra trocar a senha.
     if (!isValidPassword(input.newPassword)) throw apiError('VALIDATION_ERROR', 400, { field: 'newPassword' })
 
     upsert('users', { ...user, passwordHash: `mock:${input.newPassword}`, updatedAt: nowISO() })

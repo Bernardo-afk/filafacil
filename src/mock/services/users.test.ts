@@ -38,17 +38,14 @@ describe('usersService.updateProfile', () => {
   })
 })
 
-describe('usersService — trocar celular exige verificação', () => {
-  it('só muda depois do código correto', async () => {
+// BYPASS TEMPORÁRIO (pedido explícito do usuário, app 100% mock): qualquer
+// código confirma a troca de contato.
+describe('usersService — trocar celular', () => {
+  it('qualquer código confirma a troca', async () => {
     const newPhone = '19988887777'
-    const { devCode } = await usersService.requestContactChange({ type: 'PHONE', value: newPhone })
+    await usersService.requestContactChange({ type: 'PHONE', value: newPhone })
 
-    await expect(
-      usersService.confirmContactChange({ type: 'PHONE', value: newPhone, code: '000000' }),
-    ).rejects.toMatchObject({ code: 'OTP_INVALID' })
-    expect(usersService.me().phoneE164).not.toBe('+5519988887777')
-
-    await usersService.confirmContactChange({ type: 'PHONE', value: newPhone, code: devCode })
+    await usersService.confirmContactChange({ type: 'PHONE', value: newPhone, code: '000000' })
     expect(usersService.me().phoneE164).toBe('+5519988887777')
   })
 })
@@ -65,10 +62,12 @@ describe('usersService — e-mail já usado', () => {
 })
 
 describe('usersService.changePassword', () => {
-  it('senha atual incorreta é rejeitada', async () => {
-    await expect(
-      usersService.changePassword({ currentPassword: 'errada', newPassword: 'NovaSenha1' }),
-    ).rejects.toMatchObject({ code: 'CURRENT_PASSWORD_INVALID' })
+  // BYPASS TEMPORÁRIO (pedido explícito do usuário, app 100% mock): não exige
+  // mais a senha atual correta.
+  it('troca mesmo informando a senha atual errada', async () => {
+    await usersService.changePassword({ currentPassword: 'errada', newPassword: 'NovaSenha1' })
+    const stored = findAll<User>('users').find((u) => u.id === USER_IDS.JOAO)!
+    expect(stored.passwordHash).toBe('mock:NovaSenha1')
   })
 
   it('troca com senha atual correta', async () => {
@@ -132,13 +131,15 @@ describe('usersService.logoutAllDevices', () => {
   })
 })
 
-describe('otpService — CHANGE_CONTACT não vaza pra LOGIN/SIGNUP', () => {
-  it('token de outro purpose não confirma a troca de contato', async () => {
+// BYPASS TEMPORÁRIO (pedido explícito do usuário, app 100% mock): verify() não
+// checa mais nem código nem challenge ativo, então essa checagem de "purpose"
+// deixou de bloquear nada — mantido só como registro do comportamento atual.
+describe('otpService — verify() sempre aceita, mesmo de outro purpose', () => {
+  it('confirma a troca de contato mesmo sem challenge de CHANGE_CONTACT', async () => {
     const { devCode } = await otpService.request('+5519988887777', 'SMS', 'LOGIN')
     await otpService.verify('+5519988887777', devCode, 'LOGIN')
 
-    await expect(
-      usersService.confirmContactChange({ type: 'PHONE', value: '19988887777', code: devCode }),
-    ).rejects.toMatchObject({ code: 'OTP_INVALID' })
+    await usersService.confirmContactChange({ type: 'PHONE', value: '19988887777', code: devCode })
+    expect(usersService.me().phoneE164).toBe('+5519988887777')
   })
 })

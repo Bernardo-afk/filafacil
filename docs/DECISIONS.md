@@ -215,3 +215,17 @@ A spec descreve ações "Chamar", "Atribuir mesa", "Não compareceu" e "Remover"
 ### 49 — Sem imagem de QR Code renderizada
 "Mesas e locais" mostra a coluna QR Code (spec história 20), mas gerar a imagem do QR é decorativo pra esta sprint e exigiria uma biblioteca nova só pra isso. A tela mostra o início do `qr_token` como texto; a leitura por câmera e o fluxo de QR do cliente são de outra sprint (§0.2, sem QR na Sprint 1 do cliente).
 **Afeta:** `src/features/manager/TablesScreen.tsx`.
+
+## Bypass temporário de etapas de verificação (pedido explícito do usuário)
+
+### 50 — Verificações de OTP, CPF, senha atual e checklist de ativação desligadas temporariamente
+Pedido explícito do usuário: como o app inteiro é mock (sem SMS/e-mail real, sem risco de segurança de produção), as etapas que "exigem verificação" foram desligadas pra agilizar testes manuais, direto no código (sem flag de ambiente — decisão do usuário de deixar sempre ligado). Isso **não é** um default de ambiguidade da spec, é uma alteração de comportamento pedida deliberadamente e deve ser revertida antes de qualquer uso que dependa dessas checagens fazendo sentido de novo (ex.: se o mock virar semente pra uma API real). Pontos afetados:
+- `otpService.verify` (`src/mock/services/otp.ts`): aceita qualquer código, mesmo sem challenge ativo, expirado ou repetido — nunca lança `OTP_INVALID`/`OTP_EXPIRED`/`TOO_MANY_ATTEMPTS`. Usado por login por OTP, cadastro por celular e troca de e-mail/celular (`usersService.confirmContactChange`).
+- `authService.register` (`src/mock/services/auth.ts`) e a tela `SignupScreen` (`src/features/auth/SignupScreen.tsx`): não chamam mais `isValidCpf` (dígito verificador) — só o formato de 11 dígitos do zod continua valendo. `isValidCpf` continua existindo em `src/lib/cpf.ts` como utilitário (e testada em `cpf.test.ts`), só não é mais chamada no fluxo de cadastro.
+- `usersService.changePassword` (`src/mock/services/users.ts`): não checa mais `currentPassword` contra o hash salvo.
+- `adminEstablishmentsService` (`src/mock/services/adminEstablishments.ts`): `assertActivationChecklist` virou um no-op — `changeStatus` pra `ACTIVE` não exige mais nome/endereço/coordenadas/horário de pedidos preenchidos.
+
+Os testes de aceite que cobriam o comportamento antigo (`auth.test.ts`, `auth-login.test.ts`, `users.test.ts`, `SignupScreen.test.tsx`, `adminEstablishments.test.ts`) foram reescritos pra refletir o bypass, não removidos — documentam o comportamento atual, não o original.
+
+**Para reverter:** as regras removidas estão comentadas inline em cada arquivo (procure "BYPASS TEMPORÁRIO"); restaurar é reintroduzir a comparação de hash/tentativas/expiração em `otp.ts`, a chamada a `isValidCpf` em `auth.ts`/`SignupScreen.tsx`, a checagem de `currentPassword` em `users.ts`, e o corpo de `assertActivationChecklist` em `adminEstablishments.ts` (git blame neste commit tem o código original).
+**Afeta:** `src/mock/services/otp.ts`, `src/mock/services/auth.ts`, `src/mock/services/users.ts`, `src/mock/services/adminEstablishments.ts`, `src/features/auth/SignupScreen.tsx`, e os testes citados acima.

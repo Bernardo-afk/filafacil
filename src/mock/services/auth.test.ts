@@ -2,7 +2,6 @@ import { describe, expect, it, beforeEach } from 'vitest'
 import { authService } from './auth'
 import { otpService } from './otp'
 import { findAll, getCollection, setCollection } from '../storage'
-import { isMockApiError } from '../errors'
 import type { OtpChallenge, User } from '../types'
 
 const VALID_CPF = '529.982.247-25'
@@ -13,19 +12,20 @@ beforeEach(() => {
 })
 
 describe('authService.register — CPF', () => {
-  it('CPF inválido é bloqueado', async () => {
-    await expect(
-      authService.register({
-        firstName: 'Lucas',
-        lastName: 'Torres',
-        cpf: '111.111.111-11',
-        email: 'lucas@example.com',
-        password: 'Senha123',
-        acceptTerms: true,
-      }),
-    ).rejects.toMatchObject({ code: 'CPF_INVALID', status: 400 })
+  // BYPASS TEMPORÁRIO (pedido explícito do usuário, app 100% mock): dígito
+  // verificador de CPF não é mais exigido, só o formato de 11 dígitos.
+  it('CPF com formato válido mas dígito verificador incorreto é aceito', async () => {
+    const { user } = await authService.register({
+      firstName: 'Lucas',
+      lastName: 'Torres',
+      cpf: '111.111.111-11',
+      email: 'lucas@example.com',
+      password: 'Senha123',
+      acceptTerms: true,
+    })
 
-    expect(findAll<User>('users')).toHaveLength(0)
+    expect(findAll<User>('users')).toHaveLength(1)
+    expect(user.firstName).toBe('Lucas')
   })
 
   it('CPF já cadastrado', async () => {
@@ -177,7 +177,9 @@ describe('authService.register — termos', () => {
 })
 
 describe('OTP', () => {
-  it('código expirado', async () => {
+  // BYPASS TEMPORÁRIO (pedido explícito do usuário, app 100% mock): verify()
+  // aceita qualquer código, mesmo expirado ou após várias tentativas erradas.
+  it('código é aceito mesmo depois de expirado', async () => {
     const { devCode } = await otpService.request(`+55${VALID_PHONE}`, 'SMS', 'SIGNUP')
     const challenge = findAll<OtpChallenge>('otpChallenges')[0]
     // força a expiração sem esperar 5 minutos de verdade
@@ -185,19 +187,16 @@ describe('OTP', () => {
     collection[challenge.id].expiresAt = new Date(Date.now() - 1000).toISOString()
     setCollection('otpChallenges', collection)
 
-    await expect(otpService.verify(`+55${VALID_PHONE}`, devCode, 'SIGNUP')).rejects.toMatchObject({
-      code: 'OTP_EXPIRED',
-      status: 410,
+    await expect(otpService.verify(`+55${VALID_PHONE}`, devCode, 'SIGNUP')).resolves.toMatchObject({
+      verificationToken: challenge.id,
     })
   })
 
-  it('muitas tentativas', async () => {
+  it('código errado também é aceito, sem limite de tentativas', async () => {
     await otpService.request(`+55${VALID_PHONE}`, 'SMS', 'SIGNUP')
-    for (let i = 0; i < 5; i += 1) {
-      await expect(otpService.verify(`+55${VALID_PHONE}`, '000000', 'SIGNUP')).rejects.toBeTruthy()
+    for (let i = 0; i < 6; i += 1) {
+      await expect(otpService.verify(`+55${VALID_PHONE}`, '000000', 'SIGNUP')).resolves.toBeTruthy()
     }
-    const result = await otpService.verify(`+55${VALID_PHONE}`, '000000', 'SIGNUP').catch((e) => e)
-    expect(isMockApiError(result) && result.code).toBe('TOO_MANY_ATTEMPTS')
   })
 
   it('reenvio respeita os 60s', async () => {

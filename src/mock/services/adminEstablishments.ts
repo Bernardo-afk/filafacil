@@ -16,7 +16,6 @@ import { matchesSearch } from '../../lib/text'
 import { EstablishmentCategory, EstablishmentStatus } from '../types'
 import type {
   Establishment,
-  EstablishmentHours,
   Membership,
   Organization,
   Plan,
@@ -376,23 +375,12 @@ const TRANSITIONS: Record<Establishment['status'], Array<Establishment['status']
 }
 
 /** ⚠️ regra inferida do checklist de ativação da spec: nome, endereço, lat/lng e horário de pedidos. */
-function assertActivationChecklist(establishment: Establishment): void {
-  const hasAddress = Boolean(establishment.street && establishment.number && establishment.neighborhood && establishment.city)
-  const hasCoordinates = establishment.lat != null && establishment.lng != null
-  const hasOrdersHours = findAll<EstablishmentHours>('establishmentHours').some(
-    (h) => h.establishmentId === establishment.id && h.kind === 'ORDERS' && !h.isClosed,
-  )
-  if (!establishment.name.trim() || !hasAddress || !hasCoordinates || !hasOrdersHours) {
-    throw apiError('VALIDATION_ERROR', 400, {
-      code: 'ACTIVATION_INCOMPLETE',
-      missing: {
-        name: !establishment.name.trim(),
-        address: !hasAddress,
-        coordinates: !hasCoordinates,
-        ordersHours: !hasOrdersHours,
-      },
-    })
-  }
+// BYPASS TEMPORÁRIO (pedido explícito do usuário, app 100% mock): não exige mais
+// nome/endereço/coordenadas/horário de pedidos preenchidos pra ativar. Reverter
+// restaurando as checagens abaixo (guardadas em docs/DECISIONS.md) quando o
+// checklist de ativação for necessário de novo.
+function assertActivationChecklist(_establishment: Establishment): void {
+  return
 }
 
 /** Organização existente (associa) ou nova (estabelecimento avulso ganha uma organização própria). */

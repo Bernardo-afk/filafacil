@@ -10,7 +10,7 @@ import { OtpInput } from '../../components/ui/OtpInput'
 import { authService } from '../../mock/services/auth'
 import { otpService } from '../../mock/services/otp'
 import { isMockApiError } from '../../mock/errors'
-import { isValidCpf, formatCpf } from '../../lib/cpf'
+import { formatCpf } from '../../lib/cpf'
 import { isValidBrazilianMobile, formatBrazilianPhone, toE164 } from '../../lib/phone'
 import { isValidPassword } from '../../lib/password'
 import { useCountdown, formatCountdown } from '../../lib/useCountdown'
@@ -203,7 +203,8 @@ export function SignupScreen() {
           error={error}
           onContinue={() => {
             setError(null)
-            if (!isValidCpf(data.cpf)) return setError('CPF inválido.')
+            // BYPASS TEMPORÁRIO (pedido explícito do usuário, app 100% mock): não
+            // exige dígito verificador válido de CPF.
             setStep('terms')
           }}
         />

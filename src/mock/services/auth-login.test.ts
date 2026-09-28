@@ -51,30 +51,21 @@ describe('Login por celular com OTP', () => {
     expect(getCurrentSession()?.role).toBe('CUSTOMER')
   })
 
-  it('erra o código 2 vezes e acerta na 3ª tentativa, sem bloqueio', async () => {
+  // BYPASS TEMPORÁRIO (pedido explícito do usuário, app 100% mock): qualquer
+  // código entra, sem limite de tentativas e mesmo com o código expirado.
+  it('qualquer código informado entra na conta, sem limite de tentativas', async () => {
     await registerByPhone()
     await authService.logout()
 
-    const { devCode } = await authService.requestLoginOtp(E164_PHONE)
-    await expect(authService.loginWithOtp(E164_PHONE, '000000')).rejects.toMatchObject({ code: 'OTP_INVALID' })
-    await expect(authService.loginWithOtp(E164_PHONE, '000001')).rejects.toMatchObject({ code: 'OTP_INVALID' })
-
-    const { user } = await authService.loginWithOtp(E164_PHONE, devCode)
+    await authService.requestLoginOtp(E164_PHONE)
+    await expect(authService.loginWithOtp(E164_PHONE, '000000')).resolves.toMatchObject({
+      user: expect.objectContaining({ phoneE164: E164_PHONE }),
+    })
+    const { user } = await authService.loginWithOtp(E164_PHONE, '000001')
     expect(user.phoneE164).toBe(E164_PHONE)
   })
 
-  it('muitas tentativas', async () => {
-    await registerByPhone()
-    await authService.logout()
-    await authService.requestLoginOtp(E164_PHONE)
-
-    for (let i = 0; i < 5; i += 1) {
-      await expect(authService.loginWithOtp(E164_PHONE, '000000')).rejects.toBeTruthy()
-    }
-    await expect(authService.loginWithOtp(E164_PHONE, '000000')).rejects.toMatchObject({ code: 'TOO_MANY_ATTEMPTS' })
-  })
-
-  it('código expirado', async () => {
+  it('código expirado também entra', async () => {
     await registerByPhone()
     await authService.logout()
     const { devCode } = await authService.requestLoginOtp(E164_PHONE)
@@ -86,7 +77,8 @@ describe('Login por celular com OTP', () => {
     }
     setCollection('otpChallenges', collection)
 
-    await expect(authService.loginWithOtp(E164_PHONE, devCode)).rejects.toMatchObject({ code: 'OTP_EXPIRED', status: 410 })
+    const { user } = await authService.loginWithOtp(E164_PHONE, devCode)
+    expect(user.phoneE164).toBe(E164_PHONE)
   })
 })
 
