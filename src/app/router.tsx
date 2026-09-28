@@ -7,6 +7,12 @@ import { WelcomeScreen } from '../features/auth/WelcomeScreen'
 import { SignupScreen } from '../features/auth/SignupScreen'
 import { LoginScreen } from '../features/auth/LoginScreen'
 import { StaffEstablishmentChooser } from '../features/auth/StaffEstablishmentChooser'
+import { RequireAuth } from '../features/auth/RequireAuth'
+import { ProfileFullScreen } from '../features/profile/ProfileFullScreen'
+import { EditProfileScreen } from '../features/profile/EditProfileScreen'
+import { AccountManagementScreen } from '../features/profile/AccountManagementScreen'
+import { AddressesScreen } from '../features/profile/AddressesScreen'
+import { AddressFormScreen } from '../features/profile/AddressFormScreen'
 import { Placeholder } from '../components/ui/Placeholder'
 
 // HashRouter (spec §4 decisão 11, §13.1): GitHub Pages não sabe devolver
@@ -26,7 +32,18 @@ export const router = createHashRouter([
       { path: 'r/:establishmentId', element: <Placeholder title="Página do restaurante" story="12" /> },
       { path: 'r/:establishmentId/cardapio', element: <Placeholder title="Cardápio" story="03" /> },
       { path: 'pedidos', element: <Placeholder title="Pedidos" /> },
-      { path: 'perfil', element: <Placeholder title="Perfil" story="13" /> },
+      {
+        path: 'perfil',
+        element: <RequireAuth />,
+        children: [
+          { index: true, element: <ProfileFullScreen /> },
+          { path: 'editar', element: <EditProfileScreen /> },
+          { path: 'conta', element: <AccountManagementScreen /> },
+          { path: 'enderecos', element: <AddressesScreen /> },
+          { path: 'enderecos/novo', element: <AddressFormScreen /> },
+          { path: 'enderecos/:addressId/editar', element: <AddressFormScreen /> },
+        ],
+      },
     ],
   },
   {

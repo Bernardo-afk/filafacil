@@ -49,3 +49,21 @@ A spec exige que o app funcione 100% offline durante a apresentação (§0.2: "c
 ### 12 — Verificação em navegador não pôde ser confirmada nesta sessão
 O Browser pane usado para testar (ferramenta do ambiente, não parte do app) travou consistentemente ao carregar o bundle JS (tanto em `npm run dev` quanto em `vite preview`), mesmo com `curl` confirmando respostas HTTP 200 instantâneas e corretas do mesmo servidor. `typecheck`, `lint`, os 17 testes unitários e `npm run build` passam limpos. Recomenda-se rodar `npm run dev` localmente para confirmar visualmente antes da próxima história.
 **Afeta:** processo de verificação, não o código do app.
+
+## História 13 — Perfil do usuário
+
+### 13 — "Referência opcional" do endereço entra em `complement`
+A spec (§10.3, tela "Novo endereço") pede CEP, rua, número, complemento, bairro, cidade **e referência opcional**, mas a entidade `Address` (spec §3, já fechada na Fase 0) só tem uma coluna `complement`, sem `reference`. Como as duas são texto livre de apoio à entrega e a Fase 0 já está commitada, não adicionamos coluna nova: o campo do formulário virou "Complemento / referência (opcional)", gravado em `complement`.
+**Afeta:** `src/features/profile/AddressFormScreen.tsx`. Não muda `src/mock/types.ts`.
+
+### 14 — Sem seletor de localização no mapa
+A spec cita "localização pelo mapa" no cadastro de endereço, mas o modo mock não tem backend nem chave de geocodificação real (spec §0.2: sem serviços externos). `lat`/`lng` do `Address` ficam `null` para endereços criados/editados pela UI (igual ao seed, spec §8). Se um provedor de mapas mock entrar depois, dá pra editar só o formulário sem mudar o service.
+**Afeta:** `src/mock/services/addresses.ts`, `src/features/profile/AddressFormScreen.tsx`.
+
+### 15 — Rotas de perfil ganham um guard de sessão (`RequireAuth`)
+Nenhuma história anterior exigia sessão pra navegar: o "Explorar restaurantes" da tela de boas-vindas leva direto pra `/app` sem login (spec história 11, navegação de convidado). `/app/perfil` e suas sub-rotas são a primeira área que só faz sentido autenticado (`GET /me` não funciona sem sessão), então criamos `src/features/auth/RequireAuth.tsx`: sem sessão ativa, redireciona pro `/login`. As demais rotas de `/app` continuam abertas.
+**Afeta:** `src/app/router.tsx`, `src/features/auth/RequireAuth.tsx`.
+
+### 16 — "Sair de todos os dispositivos" também encerra a sessão local
+A spec descreve o cenário com 2 aparelhos, mas o app roda num navegador só por sessão de teste — não dá pra ter 2 abas logadas como "aparelhos" diferentes de forma realista. Decisão: `usersService.logoutAllDevices()` revoga **todo** `RefreshToken` do usuário (incluindo o deste navegador) e também limpa a sessão local (`clearSession()`), já que este aparelho está entre "todos". Sem isso, a tela continuaria mostrando dados de uma sessão cujo refresh token já foi revogado.
+**Afeta:** `src/mock/services/users.ts`, `src/features/profile/AccountManagementScreen.tsx`.

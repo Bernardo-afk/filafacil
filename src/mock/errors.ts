@@ -22,6 +22,8 @@ export type MockApiErrorCode =
   | 'FEATURE_NOT_IN_PLAN'
   | 'PLAN_LIMIT_REACHED'
   | 'SESSION_EXPIRED'
+  | 'CURRENT_PASSWORD_INVALID'
+  | 'ADDRESS_LIMIT_REACHED'
 
 export interface MockApiErrorDetails {
   [field: string]: unknown
@@ -61,6 +63,8 @@ const MESSAGES: Record<MockApiErrorCode, string> = {
   FEATURE_NOT_IN_PLAN: 'Recurso não incluso no seu plano.',
   PLAN_LIMIT_REACHED: 'Limite do plano atingido.',
   SESSION_EXPIRED: 'Sua sessão expirou.',
+  CURRENT_PASSWORD_INVALID: 'Senha atual incorreta.',
+  ADDRESS_LIMIT_REACHED: 'Limite de 10 endereços atingido.',
 }
 
 /** Atalho: `throw apiError('CPF_INVALID')` usa a mensagem padrão em pt-BR. */
