@@ -31,6 +31,7 @@ import { MenuScreen as ManagerMenuScreen } from '../features/manager/MenuScreen'
 import { PromotionsScreen } from '../features/manager/PromotionsScreen'
 import { MenuScreen as CustomerMenuScreen } from '../features/menu/MenuScreen'
 import { MenuAvailabilityScreen } from '../features/attendant/MenuAvailabilityScreen'
+import { RecipeSheetsScreen } from '../features/manager/RecipeSheetsScreen'
 import { Placeholder } from '../components/ui/Placeholder'
 
 // HashRouter (spec §4 decisão 11, §13.1): GitHub Pages não sabe devolver
@@ -85,7 +86,7 @@ export const router = createHashRouter([
           { index: true, element: <ManagerMenuScreen /> },
           { path: 'cardapio', element: <ManagerMenuScreen /> },
           { path: 'promocoes', element: <PromotionsScreen /> },
-          { path: 'fichas-tecnicas', element: <Placeholder title="Fichas técnicas" story="31" /> },
+          { path: 'fichas-tecnicas', element: <RecipeSheetsScreen /> },
           { path: 'mesas', element: <Placeholder title="Mesas e locais" story="20" /> },
           { path: 'fila', element: <Placeholder title="Fila de espera" story="21" /> },
           { path: 'estabelecimento', element: <EstablishmentScreen /> },

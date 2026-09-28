@@ -183,3 +183,13 @@ A spec valida "preço fixo maior ou igual ao preço do item é rejeitado", mas n
 ### 42 — Upload de foto sem storage real: `URL.createObjectURL`, sem persistir entre sessões
 Como não há backend (spec §0.2), não existe onde gravar o arquivo de verdade nem gerar as versões de 1000 px/400 px em WebP (`sharp`, história 28). O necessário pra exercitar a regra (JPEG/PNG/WebP até 5 MB, `400 INVALID_IMAGE` pro resto) está em `managerMenuService.validatePhoto`; a prévia usa `URL.createObjectURL` do navegador, que funciona na sessão atual mas não sobrevive a um F5 (a foto não é persistida em `localStorage`, só a URL efêmera do blob) — aceitável pra um mock de demonstração.
 **Afeta:** `src/mock/services/managerMenu.ts` (`validatePhoto`), `src/features/manager/MenuScreen.tsx`.
+
+## História 31 — Fichas técnicas
+
+### 43 — Painel de detalhe e editor de ficha viram modais na mesma tela, não rotas
+Igual às decisões 17/29 (estabelecimento e promoções): sem protótipo ligado pro editor ("Nova ficha"/"Editar ficha" ❌), a tela de fichas técnicas usa o mesmo padrão já estabelecido nas outras telas de gestor desta sprint — painel de detalhe e formulário como diálogos sobre a lista, em vez de rotas próprias. Mantém a navegação do gestor consistente entre as histórias 28/29/31.
+**Afeta:** `src/features/manager/RecipeSheetsScreen.tsx`.
+
+### 44 — Cadastro de ingredientes vive dentro da tela de Fichas técnicas
+A spec não desenha uma tela própria de "Ingredientes" — eles só aparecem como parte do fluxo de montar uma ficha (`GET/POST /establishments/:id/ingredients` é mencionado na API, mas nenhuma tela). Um painel simples de "Ingredientes" (listar + adicionar) foi colocado na mesma tela de Fichas técnicas, de onde o editor de ficha já puxa a lista pra montar as linhas — evita criar uma rota/tela extra só pra CRUD que a spec não pede.
+**Afeta:** `src/features/manager/RecipeSheetsScreen.tsx`.
