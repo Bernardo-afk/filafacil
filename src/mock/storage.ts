@@ -141,6 +141,7 @@ export function listCollectionKeys(): CollectionName[] {
 // ---------------------------------------------------------------------------
 
 const SESSION_KEY = `${PREFIX}session`
+const REFRESH_TOKEN_KEY = `${PREFIX}refreshToken`
 
 export function getSessionRaw<T>(): T | null {
   const raw = rawGet(SESSION_KEY)
@@ -158,6 +159,23 @@ export function setSessionRaw<T>(value: T): void {
 
 export function clearSessionRaw(): void {
   rawRemove(SESSION_KEY)
+}
+
+// ---------------------------------------------------------------------------
+// Refresh token opaco (spec história 06): guardado só no navegador, nunca em
+// texto puro na coleção refreshTokens (só o hash — ver mock/services/auth.ts).
+// ---------------------------------------------------------------------------
+
+export function getStoredRefreshToken(): string | null {
+  return rawGet(REFRESH_TOKEN_KEY)
+}
+
+export function setStoredRefreshToken(token: string): void {
+  rawSet(REFRESH_TOKEN_KEY, token)
+}
+
+export function clearStoredRefreshToken(): void {
+  rawRemove(REFRESH_TOKEN_KEY)
 }
 
 // ---------------------------------------------------------------------------

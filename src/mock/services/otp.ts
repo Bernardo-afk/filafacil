@@ -6,19 +6,12 @@
 import { findAll, upsert } from '../storage'
 import { apiError } from '../errors'
 import { newId, nowISO } from '../../lib/id'
+import { sha256Hex } from '../../lib/hash'
 import type { OtpChallenge, OtpPurpose } from '../types'
 
 const EXPIRES_IN_MS = 5 * 60_000
 const RESEND_AFTER_MS = 60_000
 const MAX_ATTEMPTS = 5
-
-async function sha256(value: string): Promise<string> {
-  const data = new TextEncoder().encode(value)
-  const buffer = await crypto.subtle.digest('SHA-256', data)
-  return Array.from(new Uint8Array(buffer))
-    .map((b) => b.toString(16).padStart(2, '0'))
-    .join('')
-}
 
 function randomCode(): string {
   return String(Math.floor(100000 + Math.random() * 900000))
@@ -57,7 +50,7 @@ export const otpService = {
       identifier,
       channel,
       purpose,
-      codeHash: await sha256(code),
+      codeHash: await sha256Hex(code),
       expiresAt: new Date(now + EXPIRES_IN_MS).toISOString(),
       attempts: 0,
       consumedAt: null,
@@ -82,7 +75,7 @@ export const otpService = {
       throw apiError('OTP_EXPIRED', 410)
     }
 
-    const codeHash = await sha256(code)
+    const codeHash = await sha256Hex(code)
     if (codeHash !== challenge.codeHash) {
       upsert('otpChallenges', { ...challenge, attempts: challenge.attempts + 1, updatedAt: nowISO() })
       throw apiError('OTP_INVALID', 401)

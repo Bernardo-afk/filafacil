@@ -25,14 +25,12 @@ export function WelcomeScreen() {
             Escanear QR Code
           </button>
         )}
-        <button
-          type="button"
-          disabled
-          className="rounded-full border border-border bg-card px-6 py-3 font-body font-semibold text-foreground disabled:opacity-50"
-          title="História 06"
+        <Link
+          to="/login"
+          className="rounded-full border border-border bg-card px-6 py-3 text-center font-body font-semibold text-foreground"
         >
           Entrar
-        </button>
+        </Link>
         <Link to="/cadastro" className="text-sm text-primary underline decoration-dotted">
           Ainda não tem conta? Criar conta
         </Link>

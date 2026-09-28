@@ -5,6 +5,8 @@ import { ManagerLayout } from '../layouts/ManagerLayout'
 import { AdminLayout } from '../layouts/AdminLayout'
 import { WelcomeScreen } from '../features/auth/WelcomeScreen'
 import { SignupScreen } from '../features/auth/SignupScreen'
+import { LoginScreen } from '../features/auth/LoginScreen'
+import { StaffEstablishmentChooser } from '../features/auth/StaffEstablishmentChooser'
 import { Placeholder } from '../components/ui/Placeholder'
 
 // HashRouter (spec §4 decisão 11, §13.1): GitHub Pages não sabe devolver
@@ -13,6 +15,8 @@ import { Placeholder } from '../components/ui/Placeholder'
 export const router = createHashRouter([
   { path: '/', element: <WelcomeScreen /> },
   { path: '/cadastro', element: <SignupScreen /> },
+  { path: '/login', element: <LoginScreen /> },
+  { path: '/escolher-estabelecimento', element: <StaffEstablishmentChooser /> },
   {
     path: '/app',
     element: <CustomerLayout />,
