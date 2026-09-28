@@ -121,3 +121,25 @@ A spec (`PATCH /admin/users/:id { role, memberships[] }`) não deixa claro se `m
 ### 28 — Listagens de admin (usuários/estabelecimentos) não paginam de verdade
 A spec história 36 cita "listagem paginada" nos casos de borda, mas não dá tamanho de página nem cenário Gherkin pra isso — mesma situação já aceita na história 34 (`EstablishmentsListScreen`, sem paginação real). Como o seed tem poucas dezenas de registros no máximo, `adminUsersService.list`/`adminEstablishmentsService.list` devolvem a lista inteira já filtrada; paginação de verdade fica pra quando o volume de dados justificar.
 **Afeta:** `src/mock/services/adminUsers.ts`, `src/features/admin/UsersListScreen.tsx`.
+
+## História 12 — Página do restaurante (+ Estabelecimento/Horários do gestor)
+
+### 29 — "Painel de detalhe"/"Pausar pedidos" do gestor não ganham a tela de dashboard
+A spec é explícita: "a tela do dashboard é de outra sprint, mas a API e o status entram agora, porque a página do restaurante depende deles". Implementado `managerEstablishmentService.pauseOrders/resumeOrders` (o núcleo que a história pede) e um controle simples de pausar/retomar dentro da tela "Estabelecimento" (que já existe nesta sprint) — não um dashboard novo. O texto de exemplo da spec ("Retorno estimado em 22 min") é cálculo de exibição; guardamos só `ordersPausedAt/Until/Reason` no `Establishment`, como já modelado na Fase 0.
+**Afeta:** `src/mock/services/managerEstablishment.ts`, `src/features/manager/EstablishmentScreen.tsx`.
+
+### 30 — Sem mapa interativo no formulário "Estabelecimento" do gestor
+Mesma decisão 14 (história 13, endereço do cliente): o modo mock não tem provedor de mapas real. "Localização... com mapa com o ponto ajustável" vira dois campos numéricos (latitude/longitude) editáveis diretamente, com uma nota explicando a ausência do mapa.
+**Afeta:** `src/features/manager/EstablishmentScreen.tsx`.
+
+### 31 — `PATCH /establishments/:id/hours` substitui a semana inteira, não faz merge por dia
+A spec descreve `PUT .../hours` (verbo que já sugere substituição total) mas não detalha o payload. Adotado: `managerEstablishmentService.updateHours` sempre recebe os 7 dias dos dois horários (funcionamento e pedidos) de uma vez e substitui todas as linhas de `EstablishmentHours` daquele estabelecimento — mais simples de raciocinar na UI (uma grade só) do que um PATCH parcial por dia/tipo, e citação com o verbo `PUT` da própria spec.
+**Afeta:** `src/mock/services/managerEstablishment.ts` (`updateHours`).
+
+### 32 — "Copiar horário para outros dias" virou "copiar para todos os dias"
+A spec não detalha se a cópia pede pra escolher quais dias (um seletor múltiplo) ou copia pra todos de uma vez. Sem o protótipo, a ação mais simples e menos propensa a erro é copiar o dia de origem pra todos os outros 6 de uma vez (o gestor ainda pode reajustar dias específicos depois) — evita construir um seletor de dias só pra essa ação secundária.
+**Afeta:** `src/features/manager/HoursScreen.tsx`.
+
+### 33 — Rotas `/gestor/*` ganham guard de papel (`RequireRole`)
+Mesma lógica das decisões 15/20: `managerEstablishmentService` já barra quem não tem `Membership(MANAGER)` no estabelecimento (404, spec §6), e as telas de gestor agora leem dados de verdade (antes eram só `Placeholder`). Adicionado `RequireRole roles={['STAFF']}` nas rotas `/gestor/*`, do mesmo jeito que `/admin/*` já tinha.
+**Afeta:** `src/app/router.tsx`.

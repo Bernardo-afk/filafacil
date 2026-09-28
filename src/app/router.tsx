@@ -21,6 +21,9 @@ import { PlansListScreen } from '../features/admin/PlansListScreen'
 import { PlanFormScreen } from '../features/admin/PlanFormScreen'
 import { UsersListScreen } from '../features/admin/UsersListScreen'
 import { UserDetailScreen } from '../features/admin/UserDetailScreen'
+import { RestaurantDetailScreen } from '../features/discovery/RestaurantDetailScreen'
+import { EstablishmentScreen } from '../features/manager/EstablishmentScreen'
+import { HoursScreen } from '../features/manager/HoursScreen'
 import { Placeholder } from '../components/ui/Placeholder'
 
 // HashRouter (spec §4 decisão 11, §13.1): GitHub Pages não sabe devolver
@@ -37,7 +40,7 @@ export const router = createHashRouter([
     children: [
       { index: true, element: <Placeholder title="Início" story="11" /> },
       { path: 'restaurantes', element: <Placeholder title="Restaurantes" story="11" /> },
-      { path: 'r/:establishmentId', element: <Placeholder title="Página do restaurante" story="12" /> },
+      { path: 'r/:establishmentId', element: <RestaurantDetailScreen /> },
       { path: 'r/:establishmentId/cardapio', element: <Placeholder title="Cardápio" story="03" /> },
       { path: 'pedidos', element: <Placeholder title="Pedidos" /> },
       {
@@ -63,13 +66,19 @@ export const router = createHashRouter([
     path: '/gestor',
     element: <ManagerLayout />,
     children: [
-      { index: true, element: <Placeholder title="Cardápio" story="28" /> },
-      { path: 'cardapio', element: <Placeholder title="Cardápio" story="28" /> },
-      { path: 'promocoes', element: <Placeholder title="Promoções" story="29" /> },
-      { path: 'fichas-tecnicas', element: <Placeholder title="Fichas técnicas" story="31" /> },
-      { path: 'mesas', element: <Placeholder title="Mesas e locais" story="20" /> },
-      { path: 'fila', element: <Placeholder title="Fila de espera" story="21" /> },
-      { path: 'estabelecimento', element: <Placeholder title="Estabelecimento" story="12" /> },
+      {
+        element: <RequireRole roles={['STAFF']} />,
+        children: [
+          { index: true, element: <Placeholder title="Cardápio" story="28" /> },
+          { path: 'cardapio', element: <Placeholder title="Cardápio" story="28" /> },
+          { path: 'promocoes', element: <Placeholder title="Promoções" story="29" /> },
+          { path: 'fichas-tecnicas', element: <Placeholder title="Fichas técnicas" story="31" /> },
+          { path: 'mesas', element: <Placeholder title="Mesas e locais" story="20" /> },
+          { path: 'fila', element: <Placeholder title="Fila de espera" story="21" /> },
+          { path: 'estabelecimento', element: <EstablishmentScreen /> },
+          { path: 'horarios', element: <HoursScreen /> },
+        ],
+      },
     ],
   },
   {

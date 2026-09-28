@@ -6,6 +6,7 @@ import {
   LayoutGrid,
   Users as UsersIcon,
   Store,
+  Clock,
 } from 'lucide-react'
 import { FilaZeroLogo } from '../components/brand/Logo'
 
@@ -31,7 +32,10 @@ const NAV_GROUPS: Array<{ label: string; items: Array<{ to: string; label: strin
   },
   {
     label: 'Estabelecimento',
-    items: [{ to: '/gestor/estabelecimento', label: 'Estabelecimento', icon: Store }],
+    items: [
+      { to: '/gestor/estabelecimento', label: 'Estabelecimento', icon: Store },
+      { to: '/gestor/horarios', label: 'Horários', icon: Clock },
+    ],
   },
 ]
 
