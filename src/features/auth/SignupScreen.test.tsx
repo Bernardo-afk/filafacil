@@ -48,7 +48,9 @@ describe('SignupScreen — cadastro por e-mail', () => {
     expect(users[0].marketingOptIn).toBe(false)
   })
 
-  it('bloqueia CPF inválido antes de enviar', async () => {
+  // BYPASS TEMPORÁRIO (pedido explícito do usuário, app 100% mock): não exige
+  // mais dígito verificador de CPF válido.
+  it('aceita CPF com dígito verificador inválido', async () => {
     const user = userEvent.setup()
     renderSignup()
 
@@ -63,9 +65,11 @@ describe('SignupScreen — cadastro por e-mail', () => {
 
     await user.type(screen.getByLabelText('CPF'), '11111111111')
     await user.click(screen.getByRole('button', { name: 'Continuar' }))
+    await user.click(screen.getByLabelText(/Li e aceito os Termos/))
+    await user.click(screen.getByRole('button', { name: 'Criar conta' }))
 
-    expect(await screen.findByText('CPF inválido.')).toBeInTheDocument()
-    expect(findAll<User>('users')).toHaveLength(0)
+    expect(await screen.findByText('Conta criada!')).toBeInTheDocument()
+    expect(findAll<User>('users')).toHaveLength(1)
   })
 })
 
@@ -100,7 +104,9 @@ describe('SignupScreen — cadastro por celular com OTP', () => {
     expect(users[0].phoneVerifiedAt).not.toBeNull()
   })
 
-  it('mostra erro de código incorreto sem apagar a tela', async () => {
+  // BYPASS TEMPORÁRIO (pedido explícito do usuário, app 100% mock): qualquer
+  // código digitado avança a tela, não existe mais "código incorreto".
+  it('qualquer código digitado avança pro próximo passo', async () => {
     const user = userEvent.setup()
     renderSignup()
 
@@ -116,8 +122,7 @@ describe('SignupScreen — cadastro por celular com OTP', () => {
     }
     await user.click(screen.getByRole('button', { name: 'Continuar' }))
 
-    expect(await screen.findByText('Código incorreto.')).toBeInTheDocument()
-    expect(screen.getByLabelText('Dígito 1')).toBeInTheDocument()
+    expect(await screen.findByLabelText('CPF')).toBeInTheDocument()
   })
 })
 

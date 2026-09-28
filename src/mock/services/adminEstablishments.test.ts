@@ -85,11 +85,12 @@ describe('adminEstablishmentsService — em configuração não aparece', () => 
     expect(establishmentsService.listPublic().map((e) => e.id)).not.toContain(ESTABLISHMENT_IDS.BAR_DO_ZE_CENTRO)
   })
 
-  it('ativar sem checklist completo (endereço/coordenadas/horário) é bloqueado', () => {
+  // BYPASS TEMPORÁRIO (pedido explícito do usuário, app 100% mock): ativar não
+  // exige mais endereço/coordenadas/horário preenchidos.
+  it('ativa mesmo sem checklist completo (endereço/coordenadas/horário)', () => {
     // Bar do Zé Centro nasceu "em configuração" sem endereço/lat-lng/horário (spec §8)
-    expect(() => adminEstablishmentsService.changeStatus(ESTABLISHMENT_IDS.BAR_DO_ZE_CENTRO, { status: 'ACTIVE' })).toThrowError(
-      expect.objectContaining({ code: 'VALIDATION_ERROR', status: 400 }),
-    )
+    const detail = adminEstablishmentsService.changeStatus(ESTABLISHMENT_IDS.BAR_DO_ZE_CENTRO, { status: 'ACTIVE' })
+    expect(detail.establishment.status).toBe('ACTIVE')
   })
 })
 

@@ -11,7 +11,6 @@ import type { OtpChallenge, OtpPurpose } from '../types'
 
 const EXPIRES_IN_MS = 5 * 60_000
 const RESEND_AFTER_MS = 60_000
-const MAX_ATTEMPTS = 5
 
 function randomCode(): string {
   return String(Math.floor(100000 + Math.random() * 900000))
@@ -63,26 +62,44 @@ export const otpService = {
     return { expiresAt: challenge.expiresAt, resendAvailableAt: challenge.resendAvailableAt, devCode: code }
   },
 
-  /** Devolve o id do OtpChallenge consumido — usado como "verificationToken" de curta duração. */
-  async verify(identifier: string, code: string, purpose: OtpPurpose): Promise<{ verificationToken: string }> {
-    const challenge = latestActiveChallenge(identifier, purpose)
-    if (!challenge) throw apiError('OTP_INVALID', 401)
+  /**
+   * Devolve o id do OtpChallenge consumido — usado como "verificationToken" de curta duração.
+   *
+   * BYPASS TEMPORÁRIO (pedido explícito do usuário, app 100% mock): qualquer
+   * código é sempre aceito, mesmo sem challenge ativo, expirado, ou depois de
+   * repetidas tentativas erradas — inclusive chamadas repetidas. Reverter
+   * voltando a comparar `sha256Hex(code)` com `challenge.codeHash` e checar
+   * tentativas/expiração (ver docs/DECISIONS.md) quando a verificação real de
+   * OTP for necessária de novo.
+   */
+  async verify(identifier: string, _code: string, purpose: OtpPurpose): Promise<{ verificationToken: string }> {
+    const existing =
+      latestActiveChallenge(identifier, purpose) ??
+      findAll<OtpChallenge>('otpChallenges')
+        .filter((c) => c.identifier === identifier && c.purpose === purpose)
+        .sort((a, b) => b.createdAt.localeCompare(a.createdAt))[0]
 
-    if (challenge.attempts >= MAX_ATTEMPTS) {
-      throw apiError('TOO_MANY_ATTEMPTS', 429)
-    }
-    if (new Date(challenge.expiresAt).getTime() < Date.now()) {
-      throw apiError('OTP_EXPIRED', 410)
+    if (existing) {
+      upsert('otpChallenges', { ...existing, consumedAt: existing.consumedAt ?? nowISO(), updatedAt: nowISO() })
+      return { verificationToken: existing.id }
     }
 
-    const codeHash = await sha256Hex(code)
-    if (codeHash !== challenge.codeHash) {
-      upsert('otpChallenges', { ...challenge, attempts: challenge.attempts + 1, updatedAt: nowISO() })
-      throw apiError('OTP_INVALID', 401)
+    const now = Date.now()
+    const created: OtpChallenge = {
+      id: newId(),
+      identifier,
+      channel: 'SMS',
+      purpose,
+      codeHash: '',
+      expiresAt: new Date(now + EXPIRES_IN_MS).toISOString(),
+      attempts: 0,
+      consumedAt: nowISO(),
+      resendAvailableAt: new Date(now + RESEND_AFTER_MS).toISOString(),
+      createdAt: nowISO(),
+      updatedAt: nowISO(),
     }
-
-    upsert('otpChallenges', { ...challenge, consumedAt: nowISO(), updatedAt: nowISO() })
-    return { verificationToken: challenge.id }
+    upsert('otpChallenges', created)
+    return { verificationToken: created.id }
   },
 
   /** Confere um verificationToken emitido por verify() para o mesmo identifier/purpose (usado por register/login/change-contact). */
