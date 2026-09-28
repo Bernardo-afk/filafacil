@@ -143,3 +143,21 @@ A spec não detalha se a cópia pede pra escolher quais dias (um seletor múltip
 ### 33 — Rotas `/gestor/*` ganham guard de papel (`RequireRole`)
 Mesma lógica das decisões 15/20: `managerEstablishmentService` já barra quem não tem `Membership(MANAGER)` no estabelecimento (404, spec §6), e as telas de gestor agora leem dados de verdade (antes eram só `Placeholder`). Adicionado `RequireRole roles={['STAFF']}` nas rotas `/gestor/*`, do mesmo jeito que `/admin/*` já tinha.
 **Afeta:** `src/app/router.tsx`.
+
+## História 11 — Buscar restaurantes próximos
+
+### 34 — Sem Leaflet/OpenStreetMap: alternância "Mapa" fica desabilitada
+A spec pede um `MapView` com Leaflet + OpenStreetMap, mas isso depende de carregar tiles de um servidor externo em tempo real — contradiz a exigência de a apresentação funcionar 100% offline (spec §0.2, já motivo da decisão 10 sobre fontes). Sem o protótipo pra copiar a interação exata do mapa, a alternância **Lista | Mapa** existe na tela (fiel ao layout da spec), mas o botão "Mapa" fica desabilitado com "Em breve — mapa depende de conexão com a internet"; a experiência de Lista (busca, chips, filtros, ordenação, cards) é implementada por completo.
+**Afeta:** `src/features/discovery/RestaurantsScreen.tsx`.
+
+### 35 — Localização do cliente não é uma coleção do mock, é preferência de dispositivo
+`lat/lng`/cidade escolhida pelo cliente (`LocationPermissionScreen`) não é uma entidade da spec §3 — é estado efêmero do navegador, parecido com "em qual aba eu estava". Criado `src/lib/clientLocation.ts` com sua própria chave `filazero:client-location` em vez de uma coleção nova em `storage.ts`/`CollectionName`: não precisa de multi-tenant, RBAC ou reset de seed, só persistir a preferência entre telas.
+**Afeta:** `src/lib/clientLocation.ts`, `src/features/discovery/LocationPermissionScreen.tsx`, `HomeScreen.tsx`, `RestaurantsScreen.tsx`.
+
+### 36 — Chips da busca controlam filtro **e** ordenação juntos, mesmo a spec separando os dois
+A spec diz "Ordenação e filtros são controles separados", mas também lista chips como "Mais próximos" e "Menor espera" que soam como atalhos de ordenação, junto de "Aberto agora"/"Bares"/"Restaurantes" que são filtros. Adotado: os chips continuam um controle único e simplificado (cada um seleciona um filtro OU seta o `sort`), enquanto a folha de filtros mantém "Ordenar por" como campo separado e completo (Recomendados/Mais próximos/Menor espera/Melhor avaliados) — assim quem quer os dois juntos (o caso comum) usa o chip, e quem quer combinações finas usa a folha.
+**Afeta:** `src/features/discovery/RestaurantsScreen.tsx`.
+
+### 37 — "Perto de você" e a Home global não têm produtos de cardápio nem cartões fora do escopo
+A spec é explícita: "A Home global não mostra produtos de cardápio" e a Sprint 1 esconde favoritos, pagamento, "Visitados recentemente", "Seus últimos pedidos", pedido em andamento e o card de QR (`ORDERING_ENABLED=false`). `HomeScreen` implementa só saudação, seletor de cidade, busca e "Perto de você" (reaproveitando `RestaurantCard`/`searchEstablishments` da própria história 11) — nada além disso.
+**Afeta:** `src/features/discovery/HomeScreen.tsx`.

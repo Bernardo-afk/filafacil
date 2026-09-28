@@ -68,6 +68,15 @@ export const usersService = {
     return toSafeUser(currentSessionUser())
   },
 
+  /** Como `me()`, mas devolve `null` em vez de lançar sem sessão — pra telas de convidado (história 11, Home global). */
+  meOrNull(): SafeUser | null {
+    try {
+      return usersService.me()
+    } catch {
+      return null
+    }
+  },
+
   async updateProfile(input: { firstName: string; lastName: string }): Promise<SafeUser> {
     const user = currentSessionUser()
     const parsed = updateProfileSchema.safeParse(input)

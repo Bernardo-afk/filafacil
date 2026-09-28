@@ -11,16 +11,7 @@ import { isMockApiError } from '../../mock/errors'
 import { useSessionStore } from '../../mock/session'
 import { EstablishmentCategory } from '../../mock/types'
 import type { Establishment } from '../../mock/types'
-
-const CATEGORY_LABELS: Record<string, string> = {
-  BAR: 'Bar',
-  RESTAURANT: 'Restaurante',
-  BURGER_HOUSE: 'Hamburgueria',
-  PIZZERIA: 'Pizzaria',
-  CAFE: 'Cafeteria',
-  SNACK_BAR: 'Lanchonete',
-  CANTINA: 'Cantina',
-}
+import { CATEGORY_LABELS } from '../../lib/establishmentCategory'
 
 const DURATION_OPTIONS: Array<{ label: string; minutes: number | null }> = [
   { label: '15 min', minutes: 15 },
@@ -245,7 +236,7 @@ export function EstablishmentScreen() {
                 {form.name}
                 {establishment.unitLabel ? ` · ${establishment.unitLabel}` : ''}
               </p>
-              <p className="text-sm text-muted-foreground">{CATEGORY_LABELS[form.category]}</p>
+              <p className="text-sm text-muted-foreground">{CATEGORY_LABELS[form.category as keyof typeof CATEGORY_LABELS]}</p>
               <p className="mt-2 flex items-center gap-1 text-sm text-foreground">
                 <Star size={14} className="fill-primary text-primary" />
                 {establishment.ratingAvg.toFixed(1)} ({establishment.ratingCount})

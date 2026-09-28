@@ -22,6 +22,9 @@ import { PlanFormScreen } from '../features/admin/PlanFormScreen'
 import { UsersListScreen } from '../features/admin/UsersListScreen'
 import { UserDetailScreen } from '../features/admin/UserDetailScreen'
 import { RestaurantDetailScreen } from '../features/discovery/RestaurantDetailScreen'
+import { HomeScreen } from '../features/discovery/HomeScreen'
+import { RestaurantsScreen } from '../features/discovery/RestaurantsScreen'
+import { LocationPermissionScreen } from '../features/discovery/LocationPermissionScreen'
 import { EstablishmentScreen } from '../features/manager/EstablishmentScreen'
 import { HoursScreen } from '../features/manager/HoursScreen'
 import { Placeholder } from '../components/ui/Placeholder'
@@ -38,8 +41,9 @@ export const router = createHashRouter([
     path: '/app',
     element: <CustomerLayout />,
     children: [
-      { index: true, element: <Placeholder title="Início" story="11" /> },
-      { path: 'restaurantes', element: <Placeholder title="Restaurantes" story="11" /> },
+      { index: true, element: <HomeScreen /> },
+      { path: 'restaurantes', element: <RestaurantsScreen /> },
+      { path: 'localizacao', element: <LocationPermissionScreen /> },
       { path: 'r/:establishmentId', element: <RestaurantDetailScreen /> },
       { path: 'r/:establishmentId/cardapio', element: <Placeholder title="Cardápio" story="03" /> },
       { path: 'pedidos', element: <Placeholder title="Pedidos" /> },

@@ -6,14 +6,7 @@ import { establishmentsService, type RestaurantDetailView } from '../../mock/ser
 import { isMockApiError } from '../../mock/errors'
 import { formatDistance, googleMapsDirectionsUrl } from '../../lib/geo'
 import { flags } from '../../lib/flags'
-import type { OperationalStatus } from '../../mock/types'
-
-const STATUS_META: Record<OperationalStatus, { label: string; dot: string; text: string }> = {
-  OPEN: { label: 'Aceitando pedidos', dot: 'bg-success', text: 'text-success' },
-  BUSY: { label: 'Alta demanda', dot: 'bg-warning', text: 'text-warning' },
-  PAUSED: { label: 'Pedidos temporariamente pausados', dot: 'bg-secondary', text: 'text-secondary' },
-  CLOSED: { label: 'Fechado', dot: 'bg-muted-foreground', text: 'text-muted-foreground' },
-}
+import { STATUS_META } from './operationalStatusMeta'
 
 function errorMessage(err: unknown): string {
   if (isMockApiError(err)) return err.message

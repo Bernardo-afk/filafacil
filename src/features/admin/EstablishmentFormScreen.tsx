@@ -9,16 +9,7 @@ import {
 } from '../../mock/services/adminEstablishments'
 import { isMockApiError } from '../../mock/errors'
 import { EstablishmentCategory } from '../../mock/types'
-
-const CATEGORY_LABELS: Record<string, string> = {
-  BAR: 'Bar',
-  RESTAURANT: 'Restaurante',
-  BURGER_HOUSE: 'Hamburgueria',
-  PIZZERIA: 'Pizzaria',
-  CAFE: 'Café',
-  SNACK_BAR: 'Lanchonete',
-  CANTINA: 'Cantina',
-}
+import { CATEGORY_LABELS } from '../../lib/establishmentCategory'
 
 function errorMessage(err: unknown): string {
   if (isMockApiError(err)) return err.message
