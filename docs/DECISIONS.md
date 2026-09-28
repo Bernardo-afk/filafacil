@@ -161,3 +161,25 @@ A spec diz "Ordenação e filtros são controles separados", mas também lista c
 ### 37 — "Perto de você" e a Home global não têm produtos de cardápio nem cartões fora do escopo
 A spec é explícita: "A Home global não mostra produtos de cardápio" e a Sprint 1 esconde favoritos, pagamento, "Visitados recentemente", "Seus últimos pedidos", pedido em andamento e o card de QR (`ORDERING_ENABLED=false`). `HomeScreen` implementa só saudação, seletor de cidade, busca e "Perto de você" (reaproveitando `RestaurantCard`/`searchEstablishments` da própria história 11) — nada além disso.
 **Afeta:** `src/features/discovery/HomeScreen.tsx`.
+
+## Histórias 28 + 03 + 19 + 29 — Cardápio (gestor, cliente, atendente) e promoções
+
+### 38 — `applyPercentDiscount` corrigido pra `round_half_up` em vez de arredondar pra baixo
+A função já existia desde a Fase 0 (prevista pra história 29), mas arredondava pra baixo (`Math.floor`). A spec exige explicitamente `round_half_up` no cálculo do preço promocional (história 29) e do custo de ficha técnica (história 31). Corrigida no lugar — sem uso em nenhuma outra história ainda, então não quebra nada — e testada com os valores exatos do Gherkin (R$ 22,00 −20% = R$ 17,60).
+**Afeta:** `src/lib/money.ts` (`applyPercentDiscount`, novo `roundHalfUp`).
+
+### 39 — Sem Decimal.js: cálculo de custo em `number`, arredondando só no fim
+A spec pede "usar Decimal, nunca float" pro custo de ficha técnica (história 31) e promoções. Adicionar uma biblioteca de precisão decimal só pra isso não se justifica nesta sprint — os valores do seed (spec §8) não têm nenhum caso de imprecisão de ponto flutuante real (ex.: 20 g a R$ 60,00/kg dá exatamente 120 centavos). Mantido `number` em todo o cálculo, com `roundHalfUp` só no resultado final (nunca em passos intermediários) — se aparecer um caso real de imprecisão, aí sim vale trazer uma lib de Decimal.
+**Afeta:** `src/lib/money.ts`, o cálculo de ficha técnica (história 31, a seguir).
+
+### 40 — Histórico de disponibilidade (história 19) é visível por quem pode alternar, não só pelo gestor
+`listItemHistory` inicialmente usava o mesmo guard de MANAGER da história 28 (edição de cardápio), mas a história 19 é do **atendente** — ele alterna disponibilidade e faz sentido ver o próprio histórico sem precisar do papel de gestor. Trocado pro guard `AVAILABILITY_ROLES` (`ATTENDANT`, `SUPERVISOR`, `MANAGER`), o mesmo que já protege `setAvailability`.
+**Afeta:** `src/mock/services/managerMenu.ts` (`listItemHistory`).
+
+### 41 — Preço fixo (`FIXED_PRICE_CENTS`) só com escopo "Itens"
+A spec valida "preço fixo maior ou igual ao preço do item é rejeitado", mas não diz o que fazer quando o escopo é "Todos" ou "Categorias" — itens diferentes têm preços diferentes, então um preço fixo único não faz sentido comparado a vários itens ao mesmo tempo. Adotado: `discountType: FIXED_PRICE_CENTS` exige `scope: 'ITEMS'`; pra "Todos"/"Categorias" só o percentual é aceito.
+**Afeta:** `src/mock/services/promotions.ts` (schema de validação).
+
+### 42 — Upload de foto sem storage real: `URL.createObjectURL`, sem persistir entre sessões
+Como não há backend (spec §0.2), não existe onde gravar o arquivo de verdade nem gerar as versões de 1000 px/400 px em WebP (`sharp`, história 28). O necessário pra exercitar a regra (JPEG/PNG/WebP até 5 MB, `400 INVALID_IMAGE` pro resto) está em `managerMenuService.validatePhoto`; a prévia usa `URL.createObjectURL` do navegador, que funciona na sessão atual mas não sobrevive a um F5 (a foto não é persistida em `localStorage`, só a URL efêmera do blob) — aceitável pra um mock de demonstração.
+**Afeta:** `src/mock/services/managerMenu.ts` (`validatePhoto`), `src/features/manager/MenuScreen.tsx`.

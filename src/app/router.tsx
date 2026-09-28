@@ -27,6 +27,10 @@ import { RestaurantsScreen } from '../features/discovery/RestaurantsScreen'
 import { LocationPermissionScreen } from '../features/discovery/LocationPermissionScreen'
 import { EstablishmentScreen } from '../features/manager/EstablishmentScreen'
 import { HoursScreen } from '../features/manager/HoursScreen'
+import { MenuScreen as ManagerMenuScreen } from '../features/manager/MenuScreen'
+import { PromotionsScreen } from '../features/manager/PromotionsScreen'
+import { MenuScreen as CustomerMenuScreen } from '../features/menu/MenuScreen'
+import { MenuAvailabilityScreen } from '../features/attendant/MenuAvailabilityScreen'
 import { Placeholder } from '../components/ui/Placeholder'
 
 // HashRouter (spec §4 decisão 11, §13.1): GitHub Pages não sabe devolver
@@ -45,7 +49,7 @@ export const router = createHashRouter([
       { path: 'restaurantes', element: <RestaurantsScreen /> },
       { path: 'localizacao', element: <LocationPermissionScreen /> },
       { path: 'r/:establishmentId', element: <RestaurantDetailScreen /> },
-      { path: 'r/:establishmentId/cardapio', element: <Placeholder title="Cardápio" story="03" /> },
+      { path: 'r/:establishmentId/cardapio', element: <CustomerMenuScreen /> },
       { path: 'pedidos', element: <Placeholder title="Pedidos" /> },
       {
         path: 'perfil',
@@ -64,7 +68,12 @@ export const router = createHashRouter([
   {
     path: '/atendente',
     element: <AttendantLayout />,
-    children: [{ path: 'cardapio', element: <Placeholder title="Disponibilidade do cardápio" story="19" /> }],
+    children: [
+      {
+        element: <RequireRole roles={['STAFF']} />,
+        children: [{ path: 'cardapio', element: <MenuAvailabilityScreen /> }],
+      },
+    ],
   },
   {
     path: '/gestor',
@@ -73,9 +82,9 @@ export const router = createHashRouter([
       {
         element: <RequireRole roles={['STAFF']} />,
         children: [
-          { index: true, element: <Placeholder title="Cardápio" story="28" /> },
-          { path: 'cardapio', element: <Placeholder title="Cardápio" story="28" /> },
-          { path: 'promocoes', element: <Placeholder title="Promoções" story="29" /> },
+          { index: true, element: <ManagerMenuScreen /> },
+          { path: 'cardapio', element: <ManagerMenuScreen /> },
+          { path: 'promocoes', element: <PromotionsScreen /> },
           { path: 'fichas-tecnicas', element: <Placeholder title="Fichas técnicas" story="31" /> },
           { path: 'mesas', element: <Placeholder title="Mesas e locais" story="20" /> },
           { path: 'fila', element: <Placeholder title="Fila de espera" story="21" /> },

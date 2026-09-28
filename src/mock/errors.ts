@@ -28,6 +28,14 @@ export type MockApiErrorCode =
   | 'CANNOT_SUSPEND_SELF'
   | 'LAST_ADMIN_PROTECTED'
   | 'STAFF_REQUIRES_MEMBERSHIP'
+  | 'INVALID_IMAGE'
+  | 'CATEGORY_NOT_EMPTY'
+  | 'ITEM_UNAVAILABLE'
+  | 'UNIT_INCOMPATIBLE'
+  | 'INGREDIENT_IN_USE'
+  | 'TABLE_OVERLAP'
+  | 'TABLE_CODE_TAKEN'
+  | 'TABLE_TOO_SMALL'
 
 export interface MockApiErrorDetails {
   [field: string]: unknown
@@ -73,6 +81,14 @@ const MESSAGES: Record<MockApiErrorCode, string> = {
   CANNOT_SUSPEND_SELF: 'Você não pode suspender sua própria conta.',
   LAST_ADMIN_PROTECTED: 'Não é possível remover o último administrador ativo da plataforma.',
   STAFF_REQUIRES_MEMBERSHIP: 'Um usuário STAFF precisa de pelo menos um vínculo.',
+  INVALID_IMAGE: 'Envie uma imagem JPEG, PNG ou WebP de até 5 MB.',
+  CATEGORY_NOT_EMPTY: 'Só é possível excluir categorias sem itens.',
+  ITEM_UNAVAILABLE: 'Este item está indisponível no momento.',
+  UNIT_INCOMPATIBLE: 'Unidade incompatível com a unidade de compra do ingrediente.',
+  INGREDIENT_IN_USE: 'Este ingrediente está em uso em uma ou mais fichas técnicas.',
+  TABLE_OVERLAP: 'Duas mesas não podem ocupar a mesma célula da planta.',
+  TABLE_CODE_TAKEN: 'Este código de mesa já está em uso.',
+  TABLE_TOO_SMALL: 'Esta mesa não comporta o tamanho do grupo.',
 }
 
 /** Atalho: `throw apiError('CPF_INVALID')` usa a mensagem padrão em pt-BR. */
