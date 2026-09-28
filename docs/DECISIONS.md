@@ -193,3 +193,25 @@ Igual às decisões 17/29 (estabelecimento e promoções): sem protótipo ligado
 ### 44 — Cadastro de ingredientes vive dentro da tela de Fichas técnicas
 A spec não desenha uma tela própria de "Ingredientes" — eles só aparecem como parte do fluxo de montar uma ficha (`GET/POST /establishments/:id/ingredients` é mencionado na API, mas nenhuma tela). Um painel simples de "Ingredientes" (listar + adicionar) foi colocado na mesma tela de Fichas técnicas, de onde o editor de ficha já puxa a lista pra montar as linhas — evita criar uma rota/tela extra só pra CRUD que a spec não pede.
 **Afeta:** `src/features/manager/RecipeSheetsScreen.tsx`.
+
+## Histórias 20 + 21 — Planta do salão e Fila de espera
+
+### 45 — Sem `dnd-kit`: reposicionar mesa é "selecionar e clicar no destino", não arrastar
+A spec propõe arrastar com `dnd-kit`, mas também é explícita: "não criar um CAD complexo", e o editor visual **não está desenhado** no protótipo (❌). Sem interação de referência e sem adicionar uma biblioteca de drag-and-drop só para isso, `FloorPlanScreen` usa clique: seleciona a mesa, clica em "Mover mesa", clica na célula de destino. O resultado (posição gravada em `grid_x/y/w/h`, sem sobreposição, `PUT /floor-plan` atômico) é o mesmo que a spec pede — só a interação de arrastar fica de fora.
+**Afeta:** `src/features/manager/FloorPlanScreen.tsx`.
+
+### 46 — `FloorMap` não cria elementos novos direto na grade
+A spec deixa em aberto se `PUT /floor-plan` também cria "os novos elementos" (mesa/balcão/área/ponto de retirada) inline no editor visual. Adotado: mesas são sempre criadas primeiro em "Mesas e locais" (com código, nome, área e capacidade definidos) e só depois posicionadas na Planta — o `PUT /floor-plan` só recebe posições de mesas que já existem. Evita um editor que cria e posiciona ao mesmo tempo sem nenhuma referência visual de como isso deveria funcionar.
+**Afeta:** `src/mock/services/floorPlan.ts` (`putFloorPlan`), `src/features/manager/TablesScreen.tsx`.
+
+### 47 — Notificação automática da fila mora em `floorPlan.ts`, não em `waitlist.ts`
+RF24 exige que liberar uma mesa notifique a fila "na mesma chamada de função" — ou seja, `tablesService.setStatus(...,'AVAILABLE')` e a notificação são uma coisa só. Colocar essa lógica num `waitlist.ts` separado exigiria um import cruzado (`floorPlan.ts` chamando `waitlist.ts` pra notificar, e `waitlist.ts` chamando `floorPlan.ts` pra ocupar a mesa ao atribuir) — funciona em ESM, mas é mais difícil de ler. Em vez disso, `notifyNextForFreedTable` mora dentro de `floorPlan.ts` (só lê/grava as coleções `waitlistEntries`/`notifications` via `storage.ts`, sem importar `waitlist.ts`), e `assignTable` (em `waitlist.ts`) ocupa a mesa direto por `upsert`, sem precisar chamar `floorPlan.ts` de volta. Nenhum dos dois arquivos importa o outro.
+**Afeta:** `src/mock/services/floorPlan.ts`, `src/mock/services/waitlist.ts`.
+
+### 48 — "Fila ativa" do gestor mostra `WAITING` e `NOTIFIED`, só esconde os estados finais
+A spec descreve ações "Chamar", "Atribuir mesa", "Não compareceu" e "Remover" todas na mesma tabela — ou seja, uma entrada `NOTIFIED` continua visível pro gestor até virar `SEATED`, `NO_SHOW` ou `CANCELED`. `managerWaitlistService.list` reflete isso: só esses três status finais saem da lista. A heurística de estimativa (`estimateWaitMinutes`) só roda pra quem ainda está `WAITING` — quem já foi `NOTIFIED` tem estimativa 0 (a mesa já está se resolvendo).
+**Afeta:** `src/mock/services/waitlist.ts`.
+
+### 49 — Sem imagem de QR Code renderizada
+"Mesas e locais" mostra a coluna QR Code (spec história 20), mas gerar a imagem do QR é decorativo pra esta sprint e exigiria uma biblioteca nova só pra isso. A tela mostra o início do `qr_token` como texto; a leitura por câmera e o fluxo de QR do cliente são de outra sprint (§0.2, sem QR na Sprint 1 do cliente).
+**Afeta:** `src/features/manager/TablesScreen.tsx`.

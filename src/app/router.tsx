@@ -32,6 +32,9 @@ import { PromotionsScreen } from '../features/manager/PromotionsScreen'
 import { MenuScreen as CustomerMenuScreen } from '../features/menu/MenuScreen'
 import { MenuAvailabilityScreen } from '../features/attendant/MenuAvailabilityScreen'
 import { RecipeSheetsScreen } from '../features/manager/RecipeSheetsScreen'
+import { FloorPlanScreen } from '../features/manager/FloorPlanScreen'
+import { TablesScreen } from '../features/manager/TablesScreen'
+import { WaitlistScreen } from '../features/manager/WaitlistScreen'
 import { Placeholder } from '../components/ui/Placeholder'
 
 // HashRouter (spec §4 decisão 11, §13.1): GitHub Pages não sabe devolver
@@ -87,8 +90,9 @@ export const router = createHashRouter([
           { path: 'cardapio', element: <ManagerMenuScreen /> },
           { path: 'promocoes', element: <PromotionsScreen /> },
           { path: 'fichas-tecnicas', element: <RecipeSheetsScreen /> },
-          { path: 'mesas', element: <Placeholder title="Mesas e locais" story="20" /> },
-          { path: 'fila', element: <Placeholder title="Fila de espera" story="21" /> },
+          { path: 'planta', element: <FloorPlanScreen /> },
+          { path: 'mesas', element: <TablesScreen /> },
+          { path: 'fila', element: <WaitlistScreen /> },
           { path: 'estabelecimento', element: <EstablishmentScreen /> },
           { path: 'horarios', element: <HoursScreen /> },
         ],

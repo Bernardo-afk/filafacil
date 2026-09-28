@@ -7,6 +7,7 @@ import {
   Users as UsersIcon,
   Store,
   Clock,
+  Map,
 } from 'lucide-react'
 import { FilaZeroLogo } from '../components/brand/Logo'
 
@@ -26,7 +27,7 @@ const NAV_GROUPS: Array<{ label: string; items: Array<{ to: string; label: strin
   {
     label: 'Salão',
     items: [
-      { to: '/gestor/mesas', label: 'Mesas e locais', icon: LayoutGrid },
+      { to: '/gestor/planta', label: 'Planta', icon: Map },
       { to: '/gestor/fila', label: 'Fila de espera', icon: UsersIcon },
     ],
   },
@@ -34,6 +35,7 @@ const NAV_GROUPS: Array<{ label: string; items: Array<{ to: string; label: strin
     label: 'Estabelecimento',
     items: [
       { to: '/gestor/estabelecimento', label: 'Estabelecimento', icon: Store },
+      { to: '/gestor/mesas', label: 'Mesas e locais', icon: LayoutGrid },
       { to: '/gestor/horarios', label: 'Horários', icon: Clock },
     ],
   },
