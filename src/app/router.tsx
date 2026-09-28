@@ -4,6 +4,7 @@ import { AttendantLayout } from '../layouts/AttendantLayout'
 import { ManagerLayout } from '../layouts/ManagerLayout'
 import { AdminLayout } from '../layouts/AdminLayout'
 import { WelcomeScreen } from '../features/auth/WelcomeScreen'
+import { SignupScreen } from '../features/auth/SignupScreen'
 import { Placeholder } from '../components/ui/Placeholder'
 
 // HashRouter (spec §4 decisão 11, §13.1): GitHub Pages não sabe devolver
@@ -11,6 +12,7 @@ import { Placeholder } from '../components/ui/Placeholder'
 // rota vive depois do "#".
 export const router = createHashRouter([
   { path: '/', element: <WelcomeScreen /> },
+  { path: '/cadastro', element: <SignupScreen /> },
   {
     path: '/app',
     element: <CustomerLayout />,

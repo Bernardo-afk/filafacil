@@ -33,14 +33,9 @@ export function WelcomeScreen() {
         >
           Entrar
         </button>
-        <button
-          type="button"
-          disabled
-          className="text-sm text-muted-foreground underline decoration-dotted disabled:opacity-50"
-          title="História 01"
-        >
+        <Link to="/cadastro" className="text-sm text-primary underline decoration-dotted">
           Ainda não tem conta? Criar conta
-        </button>
+        </Link>
         <Link to="/app" className="text-sm text-primary underline decoration-dotted">
           Explorar restaurantes
         </Link>
