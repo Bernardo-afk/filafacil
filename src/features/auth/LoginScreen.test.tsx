@@ -48,7 +48,9 @@ describe('LoginScreen — e-mail e senha', () => {
     expect(await screen.findByText('Área do admin')).toBeInTheDocument()
   })
 
-  it('credencial inválida mostra erro sem revelar se a conta existe', async () => {
+  // BYPASS TEMPORÁRIO (pedido explícito do usuário, app 100% mock): login com
+  // e-mail desconhecido cria a conta na hora e entra.
+  it('e-mail desconhecido cria a conta na hora e entra', async () => {
     const user = userEvent.setup()
     renderLogin()
 
@@ -57,7 +59,7 @@ describe('LoginScreen — e-mail e senha', () => {
     await user.type(await screen.findByLabelText('Senha'), 'QualquerSenha1')
     await user.click(screen.getByRole('button', { name: 'Entrar' }))
 
-    expect(await screen.findByText('E-mail ou senha incorretos.')).toBeInTheDocument()
+    expect(await screen.findByText('Área do cliente')).toBeInTheDocument()
   })
 
   it('usuário suspenso não consegue entrar', async () => {

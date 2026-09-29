@@ -91,16 +91,20 @@ describe('Login por e-mail e senha', () => {
     expect(user.email).toBe('maria@example.com')
   })
 
-  it('credencial inválida não vaza informação (mesma mensagem pra e-mail inexistente e senha errada)', async () => {
+  // BYPASS TEMPORÁRIO (pedido explícito do usuário, app 100% mock): qualquer
+  // e-mail/senha entra — se a conta não existir, é criada na hora; se existir,
+  // a senha não é mais checada.
+  it('senha errada entra mesmo assim, e e-mail desconhecido cria a conta na hora', async () => {
     await registerByEmail('maria@example.com', 'Senha123')
     await authService.logout()
 
-    const wrongPassword = await authService.login({ email: 'maria@example.com', password: 'SenhaErrada1' }).catch((e) => e)
-    const noSuchEmail = await authService.login({ email: 'ninguem@example.com', password: 'SenhaErrada1' }).catch((e) => e)
+    const { user: wrongPassword } = await authService.login({ email: 'maria@example.com', password: 'SenhaErrada1' })
+    expect(wrongPassword.email).toBe('maria@example.com')
+    await authService.logout()
 
-    expect(wrongPassword.code).toBe('INVALID_CREDENTIALS')
-    expect(noSuchEmail.code).toBe('INVALID_CREDENTIALS')
-    expect(wrongPassword.message).toBe(noSuchEmail.message)
+    const { user: newAccount } = await authService.login({ email: 'ninguem@example.com', password: 'SenhaErrada1' })
+    expect(newAccount.email).toBe('ninguem@example.com')
+    expect(newAccount.role).toBe('CUSTOMER')
   })
 })
 

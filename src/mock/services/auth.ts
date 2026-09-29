@@ -90,6 +90,43 @@ function touchLastLogin(user: User): User {
   return updated
 }
 
+/**
+ * BYPASS TEMPORÁRIO (pedido explícito do usuário, app 100% mock): cria uma
+ * conta CUSTOMER na hora quando o login (e-mail/senha ou celular/OTP) não
+ * encontra ninguém com aquele identificador — mesmo padrão que `loginWithGoogle`
+ * já usava. Reverter voltando a lançar `INVALID_CREDENTIALS` quando o usuário
+ * não existir (ver docs/DECISIONS.md).
+ */
+function autoCreateCustomer(fields: { email?: string; phone?: string }): User {
+  const now = nowISO()
+  const user: User = {
+    id: newId(),
+    firstName: '',
+    lastName: '',
+    email: fields.email ?? null,
+    emailVerifiedAt: fields.email ? now : null,
+    phoneE164: fields.phone ?? null,
+    phoneVerifiedAt: fields.phone ? now : null,
+    passwordHash: null,
+    cpfEncrypted: null,
+    cpfHash: null,
+    role: 'CUSTOMER',
+    status: 'ACTIVE',
+    tokenVersion: 0,
+    consentVersion: 'v1',
+    consentAcceptedAt: now,
+    marketingOptIn: false,
+    ageConfirmedAt: null,
+    lastLoginAt: now,
+    deletedAt: null,
+    anonymizedAt: null,
+    createdAt: now,
+    updatedAt: now,
+  }
+  upsert('users', user)
+  return user
+}
+
 export const authService = {
   async register(input: RegisterInput): Promise<{ user: SafeUser; refreshToken: string }> {
     const parsed = registerSchema.safeParse(input)
@@ -177,10 +214,12 @@ export const authService = {
     const parsed = schema.safeParse(input)
     if (!parsed.success) throw apiError('VALIDATION_ERROR', 400, { issues: parsed.error.issues })
 
-    // mesma mensagem pra e-mail inexistente e senha errada — não revela se a conta existe (spec história 06)
-    const user = findAll<User>('users').find((u) => u.email === parsed.data.email)
-    if (!user || user.passwordHash !== `mock:${parsed.data.password}`) {
-      throw apiError('INVALID_CREDENTIALS', 401)
+    // BYPASS TEMPORÁRIO (pedido explícito do usuário, app 100% mock): qualquer
+    // e-mail/senha entra — cria a conta na hora se ainda não existir, e não
+    // checa mais a senha de contas já existentes.
+    let user = findAll<User>('users').find((u) => u.email === parsed.data.email)
+    if (!user) {
+      user = autoCreateCustomer({ email: parsed.data.email })
     }
     if (user.status === 'SUSPENDED') throw apiError('ACCOUNT_SUSPENDED', 403)
 
@@ -199,8 +238,12 @@ export const authService = {
     const phone = toE164(identifier)
     await otpService.verify(phone, code, 'LOGIN')
 
-    const user = findAll<User>('users').find((u) => u.phoneE164 === phone)
-    if (!user) throw apiError('INVALID_CREDENTIALS', 401)
+    // BYPASS TEMPORÁRIO (pedido explícito do usuário, app 100% mock): qualquer
+    // celular entra — cria a conta na hora se ainda não existir.
+    let user = findAll<User>('users').find((u) => u.phoneE164 === phone)
+    if (!user) {
+      user = autoCreateCustomer({ phone })
+    }
     if (user.status === 'SUSPENDED') throw apiError('ACCOUNT_SUSPENDED', 403)
 
     const fresh = touchLastLogin(user)
