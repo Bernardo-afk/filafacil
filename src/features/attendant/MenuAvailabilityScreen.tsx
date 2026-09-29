@@ -55,7 +55,7 @@ export function MenuAvailabilityScreen() {
 
   if (!establishmentId) {
     return (
-      <div className="p-8">
+      <div className="p-4 sm:p-6 md:p-8">
         <p className="text-sm text-muted-foreground">Selecione um estabelecimento para continuar.</p>
       </div>
     )

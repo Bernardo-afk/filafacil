@@ -22,7 +22,7 @@ export function PlansListScreen() {
     <div className="flex flex-col">
       <AdminHeader title="Planos" onRefresh={reload} />
 
-      <div className="flex flex-col gap-4 p-8">
+      <div className="flex flex-col gap-4 p-4 sm:p-6 md:p-8">
         <button
           type="button"
           onClick={() => navigate('/admin/planos/novo')}

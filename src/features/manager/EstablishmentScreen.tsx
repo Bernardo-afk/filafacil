@@ -137,7 +137,7 @@ export function EstablishmentScreen() {
 
   if (!activeEstablishmentId) {
     return (
-      <div className="p-8">
+      <div className="p-4 sm:p-6 md:p-8">
         <p className="text-sm text-muted-foreground">Selecione um estabelecimento para continuar.</p>
       </div>
     )
@@ -147,7 +147,7 @@ export function EstablishmentScreen() {
   const isPaused = Boolean(establishment.ordersPausedAt)
 
   return (
-    <div className="flex flex-col gap-8 p-8">
+    <div className="flex flex-col gap-8 p-4 sm:p-6 md:p-8">
       <div>
         <h1 className="font-display text-xl font-bold text-foreground">Estabelecimento</h1>
         <p className="text-sm text-muted-foreground">Informações básicas e localização.</p>
