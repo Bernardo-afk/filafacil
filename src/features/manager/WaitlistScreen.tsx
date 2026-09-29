@@ -107,14 +107,14 @@ export function WaitlistScreen() {
 
   if (!establishmentId) {
     return (
-      <div className="p-8">
+      <div className="p-4 sm:p-6 md:p-8">
         <p className="text-sm text-muted-foreground">Selecione um estabelecimento para continuar.</p>
       </div>
     )
   }
   if (featureBlocked) {
     return (
-      <div className="p-8">
+      <div className="p-4 sm:p-6 md:p-8">
         <p className="text-sm text-error">Recurso não incluso no seu plano. Fale com o administrador da plataforma para fazer upgrade.</p>
       </div>
     )
@@ -124,7 +124,7 @@ export function WaitlistScreen() {
   const compatibleFreeTables = assigning ? tables.filter((t) => t.isActive && t.type === 'TABLE' && t.status === 'AVAILABLE' && (t.capacity ?? 0) >= assigning.entry.partySize) : []
 
   return (
-    <div className="flex flex-col gap-6 p-8">
+    <div className="flex flex-col gap-6 p-4 sm:p-6 md:p-8">
       <h1 className="font-display text-xl font-bold text-foreground">Fila de espera</h1>
 
       <div className="flex flex-wrap gap-4">
@@ -147,7 +147,8 @@ export function WaitlistScreen() {
             <Plus size={16} /> Adicionar
           </LoadingButton>
         </div>
-        <table className="w-full text-left text-sm">
+        <div className="overflow-x-auto">
+        <table className="w-full min-w-[640px] text-left text-sm">
           <thead className="bg-muted text-xs uppercase tracking-wide text-muted-foreground">
             <tr>
               <th className="px-4 py-3 font-medium">Pos.</th>
@@ -197,6 +198,7 @@ export function WaitlistScreen() {
             )}
           </tbody>
         </table>
+        </div>
       </div>
 
       {adding && (

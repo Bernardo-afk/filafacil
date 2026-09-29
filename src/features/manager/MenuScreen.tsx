@@ -161,15 +161,15 @@ export function MenuScreen() {
 
   if (!establishmentId) {
     return (
-      <div className="p-8">
+      <div className="p-4 sm:p-6 md:p-8">
         <p className="text-sm text-muted-foreground">Selecione um estabelecimento para continuar.</p>
       </div>
     )
   }
 
   return (
-    <div className="flex flex-col gap-6 p-8">
-      <div className="flex items-center justify-between">
+    <div className="flex flex-col gap-6 p-4 sm:p-6 md:p-8">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="font-display text-xl font-bold text-foreground">Cardápio</h1>
           <p className="text-sm text-muted-foreground">{items.length} itens no cardápio</p>
@@ -203,8 +203,8 @@ export function MenuScreen() {
 
       {error && <p className="text-sm text-error">{error}</p>}
 
-      <div className="overflow-hidden rounded-[var(--radius-md)] border border-border bg-card">
-        <table className="w-full text-left text-sm">
+      <div className="overflow-x-auto rounded-[var(--radius-md)] border border-border bg-card">
+        <table className="w-full min-w-[640px] text-left text-sm">
           <thead className="bg-muted text-xs uppercase tracking-wide text-muted-foreground">
             <tr>
               <th className="px-4 py-3 font-medium">Item</th>

@@ -95,28 +95,28 @@ export function TablesScreen() {
 
   if (!establishmentId) {
     return (
-      <div className="p-8">
+      <div className="p-4 sm:p-6 md:p-8">
         <p className="text-sm text-muted-foreground">Selecione um estabelecimento para continuar.</p>
       </div>
     )
   }
 
   return (
-    <div className="flex flex-col gap-6 p-8">
-      <div className="flex items-center justify-between">
+    <div className="flex flex-col gap-6 p-4 sm:p-6 md:p-8">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="font-display text-xl font-bold text-foreground">Mesas e locais</h1>
           <p className="text-sm text-muted-foreground">
             {tables.length} locais configurados em {areas.length} áreas
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <div className="flex items-center gap-1">
             <input
               value={newAreaName}
               onChange={(e) => setNewAreaName(e.target.value)}
               placeholder="Nova área"
-              className="rounded-full border border-border px-3 py-1.5 text-sm text-foreground outline-none"
+              className="w-28 rounded-full border border-border px-3 py-1.5 text-sm text-foreground outline-none"
             />
             <button type="button" onClick={addArea} className="rounded-full bg-muted p-1.5 text-foreground">
               <Plus size={14} />
@@ -133,8 +133,8 @@ export function TablesScreen() {
       {areas.map((area) => (
         <div key={area.id} className="flex flex-col gap-2">
           <h2 className="font-body text-sm font-semibold text-foreground">{area.name}</h2>
-          <div className="overflow-hidden rounded-[var(--radius-md)] border border-border bg-card">
-            <table className="w-full text-left text-sm">
+          <div className="overflow-x-auto rounded-[var(--radius-md)] border border-border bg-card">
+            <table className="w-full min-w-[560px] text-left text-sm">
               <thead className="bg-muted text-xs uppercase tracking-wide text-muted-foreground">
                 <tr>
                   <th className="px-4 py-3 font-medium">Mesa/Local</th>

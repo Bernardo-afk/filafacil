@@ -59,7 +59,7 @@ export function EstablishmentDetailScreen() {
 
   if (error) {
     return (
-      <div className="p-8">
+      <div className="p-4 sm:p-6 md:p-8">
         <p className="text-sm text-error">{error}</p>
       </div>
     )
@@ -107,7 +107,7 @@ export function EstablishmentDetailScreen() {
     <div className="flex flex-col">
       <AdminHeader title="Detalhe do estabelecimento" onRefresh={reload} />
 
-      <div className="flex flex-col gap-6 p-8">
+      <div className="flex flex-col gap-6 p-4 sm:p-6 md:p-8">
         <button
           type="button"
           onClick={() => navigate('/admin/estabelecimentos')}

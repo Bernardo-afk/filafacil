@@ -42,9 +42,9 @@ export function EstablishmentsListScreen() {
     <div className="flex flex-col">
       <AdminHeader title="Estabelecimentos" onRefresh={reload} />
 
-      <div className="flex flex-col gap-4 p-8">
-        <div className="flex items-center gap-3">
-          <div className="flex flex-1 items-center gap-2 rounded-[var(--radius-md)] border border-border bg-card px-4 py-2.5">
+      <div className="flex flex-col gap-4 p-4 sm:p-6 md:p-8">
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="flex min-w-[200px] flex-1 items-center gap-2 rounded-[var(--radius-md)] border border-border bg-card px-4 py-2.5">
             <Search size={18} className="text-muted-foreground" />
             <input
               value={q}
@@ -98,8 +98,8 @@ export function EstablishmentsListScreen() {
           </div>
         )}
 
-        <div className="overflow-hidden rounded-[var(--radius-md)] border border-border bg-card">
-          <table className="w-full text-left text-sm">
+        <div className="overflow-x-auto rounded-[var(--radius-md)] border border-border bg-card">
+          <table className="w-full min-w-[720px] text-left text-sm">
             <thead className="bg-muted text-xs uppercase tracking-wide text-muted-foreground">
               <tr>
                 <th className="px-4 py-3 font-medium">Estabelecimento</th>

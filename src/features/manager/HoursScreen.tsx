@@ -175,14 +175,14 @@ export function HoursScreen() {
 
   if (!activeEstablishmentId) {
     return (
-      <div className="p-8">
+      <div className="p-4 sm:p-6 md:p-8">
         <p className="text-sm text-muted-foreground">Selecione um estabelecimento para continuar.</p>
       </div>
     )
   }
 
   return (
-    <div className="flex max-w-3xl flex-col gap-8 p-8">
+    <div className="flex max-w-3xl flex-col gap-8 p-4 sm:p-6 md:p-8">
       <div>
         <h1 className="font-display text-xl font-bold text-foreground">Horários</h1>
         <p className="text-sm text-muted-foreground">Funcionamento e pedidos pelo FilaZero podem ter janelas diferentes.</p>

@@ -122,7 +122,7 @@ export function EstablishmentFormScreen() {
     (isEditing || newOrg ? true : Boolean(form.organizationId))
 
   return (
-    <div className="flex flex-col p-8">
+    <div className="flex flex-col p-4 sm:p-6 md:p-8">
       <button
         type="button"
         onClick={() => navigate('/admin/estabelecimentos')}

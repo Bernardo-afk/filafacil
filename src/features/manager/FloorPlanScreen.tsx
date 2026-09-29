@@ -90,15 +90,15 @@ export function FloorPlanScreen() {
 
   if (!establishmentId) {
     return (
-      <div className="p-8">
+      <div className="p-4 sm:p-6 md:p-8">
         <p className="text-sm text-muted-foreground">Selecione um estabelecimento para continuar.</p>
       </div>
     )
   }
 
   return (
-    <div className="flex flex-col gap-6 p-8">
-      <div className="flex items-center justify-between">
+    <div className="flex flex-col gap-6 p-4 sm:p-6 md:p-8">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="font-display text-xl font-bold text-foreground">Planta do salão</h1>
         {dirty && (
           <LoadingButton loading={saving} onClick={saveLayout}>

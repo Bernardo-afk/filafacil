@@ -81,7 +81,7 @@ export function PlanFormScreen() {
   const canSave = form.code.trim().length > 0 && form.name.trim().length > 0 && (unlimited || (form.maxUnits ?? 0) >= 1)
 
   return (
-    <div className="flex flex-col p-8">
+    <div className="flex flex-col p-4 sm:p-6 md:p-8">
       <button
         type="button"
         onClick={() => navigate('/admin/planos')}
